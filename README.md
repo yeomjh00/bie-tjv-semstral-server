@@ -1,92 +1,113 @@
 # BIE-TJV-Semestral-Project
+# Agriculture Management System
+## Tools
+- JDK 17
+- MySQL
+
+## Optional Goal
+Based on posts which each users liked, introducing recommendation system.
+
+## Build Tools
+- Gradle (version not fixed)
+
+## Data
+![DataConceptualRelation](./images/data_conceptual_relation.png)
+### User
+#### Field (Name: Description / Data Type / Nullable)
+ - UserId: Identifier for farmers / Long / Not Null
+ - RealName: Real name of farmer / String / Null
+ - PostLikedByMe: Post I liked / Collection\<Post> / Null
+ - MyPosts: Post I uploaded / Collection\<Post> / Null
+ - MyMusicList: Music list I made by adding from Music Database / Collection\<Post> / Null
+
+#### Relation
+with Post: 
+- Many to Many Relation: "Like" system
+- One to Many Relation: Creating by User
+
+with Music List:
+ - One to May Relation: Creating by User
+
+### Post
+#### Field (Name: Description / Data Type / Nullable)
+- PostId: Identifier for Post / Long / Not Null
+- TextContents: Text Contents / String / Not Null
+- Author: Author of the post / User / Not Null
+- Likes: user who like this post / Collection\<User> / Null
+- NonplayableMedia: Media contained in this post. can contain multiple media (i.e. Photos) / Collection\<NonplayableMedia> / Null
+- PlayableMedia: Media contained in this post. cna only contain single media (i.e. Music) / PlayableMedia / Null
+- Optional Field
+  - Replies: Replies of this post / Collection\<Post> / Null
+  - ReplyTo: target of reply of this oost / Optional\<Post> / Null
+
+#### Relation
+with Uesr: see User Section
+
+with Media:
+ - One to May Relation: Contained by Posts
+
+### Media
+#### Field (Name: Description / Data Type / Nullable)
+1. NonplayableMedia
+ - width: - / Long / Not Null
+ - height: - / Long / Not Null
+
+2. PlayableMedia
+- MusicId: identifier of music / Long / Not Null
+- PlayTime: playtime of each music / Long / Not Null
+- PostedTimes: how many posted / Long / Not Null (Default: 0)
+
+#### Relation
+with Post: see Post Section
+
+with Music List:
+ - Many to One Relation: single music list can contain multiple musics at a time.
+
+### MusicList
+#### Field (Name: Description / Data Type / Nullable)
+ - ListId: identifier of the lists / Long / Not Null
+ - Owner: owner of this list / User / Not Null
+ - Musics: Musics contained by this list / Collection\<PlayableMedia> / Null
+
+#### Relation
+
+with User: See User Section
+
+with Media: See Media Section
+
+---
+
+## Query
+### Basic Query
+- Find the musics which I like - contained in my music list or, post I liked.
+- Find the music with liked more than user-given-threshold 
+
+### Using Subquery
+Based on threshold given by user, find the liked musics which have posted time more than the threshold.
+
+### Using Join
+find the posts which contain the music with more posted times than user-given-threshold.
+
+## Business Operation Logic
+Assume
+1. we have 3 layers (Presentation / Application / Persistence)
+2. Behavior of Presentation Layer is omitted. (Since I assumed all behaviors in this layer are just pressing the button as an action, update the window as a respondance)
+w
+
+1. Creation of Posts
+   1. write `Insert` query into post database
+
+2. Like System
+   1. Like
+      1. Get liked users through db, judge whether user is unique
+      2. Depend on the result of judge, write query for updating
+      3. Let persistance layer accept this query
+
+   2. See LikedByMe Posts
+      1. Write `Select` query from Post Repository and 
 
 
 
-## Getting started
+d
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.fit.cvut.cz/yeomjaeh/bie-tjv-semestral-project.git
-git branch -M master
-git push -uf origin master
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.fit.cvut.cz/yeomjaeh/bie-tjv-semestral-project/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Presentation Layer / Application Layer (=Business Layer) / Persistent Layer 로 나눠져 있는데, 각 행동마다 어떻게 Layer가 행동하는지에 대해 적으면 될듯 하다.
