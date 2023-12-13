@@ -1,5 +1,6 @@
 package social_network.web.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,12 +12,13 @@ import social_network.web.service.UserService;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 public class UserController {
 
     private final UserService userService;
-    public static final String userRegister = "users/new";
-    public static final String allUsers = "users/userList";
+    public static final String userRegister = "/users/new";
+    public static final String allUsers = "/users/userList";
 
     @Autowired
     public UserController(UserService userService){
@@ -29,13 +31,19 @@ public class UserController {
         return userRegister;
     }
 
-    @PostMapping(userRegister)
+    @PostMapping("/users/new")
     public String create(UserRegisterForm form){
         User user = new User();
         user.setRealName(form.getRealName());
         user.setUsername(form.getUsername());
 
-        userService.save(user);
+        try {
+            userService.save(user);
+        } catch (Exception e) {
+            log.error("Error occurred while saving user", e);
+            return "redirect:/";
+        }
+        log.info("User saved successfully");
 
         return "redirect:/";
     }
