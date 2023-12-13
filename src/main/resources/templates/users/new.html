@@ -4,10 +4,16 @@
 <body>
 
 <div class="container">
-  <form action="@{userRegisterForm}" method="post">
+  <!--@{userRegisterForm}-->
+  <form action="/users/new" method="post">
     <div class="form-group">
-      <label for="name">이름</label>
-      <input type="text" id="name" name="name" placeholder="이름을 입력하세요.">
+
+      <label for="realName">이름</label>
+      <input type="text" id="realName" name="realName" placeholder="이름을 입력하세요.">
+
+      <label for="username">유저 이름</label>
+      <input type="text" id="username" name="username" placeholder="이름을 입력하세요.">
+
     </div>
     <button type="submit">등록</button>
   </form>
