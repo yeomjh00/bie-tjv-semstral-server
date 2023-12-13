@@ -1,11 +1,14 @@
 package social_network.web.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.mapping.Set;
 
 import java.util.Collection;
 
 @Entity
+@Getter @Setter
 @Table(name = "users")
 public class User {
     @Id
