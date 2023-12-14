@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import social_network.web.domain.User;
+import social_network.web.repository.UserJpaRepository;
 import social_network.web.repository.UserRepository;
 
 import java.util.List;
@@ -13,12 +14,16 @@ import java.util.Optional;
 @Transactional
 public class UserService implements CrudService<User, Long> {
     private final UserRepository userRepository;
+
     public UserService(@Autowired UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
     public User save(User user) {
+        if (existsByUsername(user.getUsername())){
+            throw new IllegalArgumentException("Username already exists");
+        }
         userRepository.save(user);
         return user;
     }
@@ -45,6 +50,10 @@ public class UserService implements CrudService<User, Long> {
 
     public Optional<User> findByRealName(String realName) {
         return userRepository.findByRealName(realName);
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 
 }
