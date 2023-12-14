@@ -10,6 +10,7 @@ import social_network.web.controller.asset.UserRegisterForm;
 import social_network.web.domain.User;
 import social_network.web.service.UserService;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -32,16 +33,22 @@ public class UserController {
     }
 
     @PostMapping("/users/new")
-    public String create(UserRegisterForm form){
+    public String create(UserRegisterForm form, Model model){
         User user = new User();
         user.setRealName(form.getRealName());
         user.setUsername(form.getUsername());
 
         try {
             userService.save(user);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e){
+            log.error("Trial of duplicated username", e);
+            model.addAttribute("errorStatement", e.getMessage());
+            return "redirect:/error";
+        }
+        catch (Exception e) {
             log.error("Error occurred while saving user", e);
-            return "redirect:/";
+            model.addAttribute("errorStatement", e.getMessage());
+            return "redirect:/error";
         }
         log.info("User saved successfully");
 
@@ -50,8 +57,8 @@ public class UserController {
 
     @GetMapping(allUsers)
     public String list(Model model){
-        List<User> users = userService.findAll();
-        model.addAttribute("allUsers", users);
+        var users = userService.findAll();
+        model.addAttribute("users", users);
         return allUsers;
     }
 }
