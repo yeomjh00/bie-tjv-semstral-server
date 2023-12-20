@@ -7,11 +7,14 @@ import java.util.Collection;
 @Entity
 public class MusicList {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "listId")
     private Long id;
     @ManyToOne
-    private User creator;
+    @JoinColumn(name = "owner")
+    private User owner;
     private String listName;
     private String description;
     @ManyToMany(mappedBy = "containedLists")
-    private Collection<PlayableMedia> musicList;
+    private Collection<Music> track;
 }

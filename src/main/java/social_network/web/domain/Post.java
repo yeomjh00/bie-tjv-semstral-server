@@ -1,28 +1,33 @@
 package social_network.web.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collection;
+import java.util.Optional;
 
+// post_id / author_user_id / content / replyTo_post_id / title
 @Entity
 @Table(name = "posts")
+@Getter @Setter
 public class Post {
     @Id
-    @GeneratedValue
-    @Column(name = "post_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "postId")
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name ="author")
     private User author;
     private String title;
     private String content;
     @ManyToMany
     private Collection<User> likes;
 
-    @OneToMany(mappedBy = "replyTo")
-    private Collection<Post> replies;
+    @OneToMany
+    private Collection<Picture> pictures;
 
-    @ManyToOne
-    private Post replyTo;
-    // Medias
+    @OneToMany
+    private Collection<Music> songs;
 }

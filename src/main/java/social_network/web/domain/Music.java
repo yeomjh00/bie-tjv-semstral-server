@@ -8,16 +8,18 @@ import java.util.Collection;
 import java.util.Date;
 
 @Entity
-@DiscriminatorColumn(name = "DTYPE")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "music")
 @Getter @Setter
-public abstract class Media {
+public class Music{
     @Id
-    @GeneratedValue
-    @Column(name = "media_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "musicId")
     private Long id;
     private String uri;
     private String description;
-    private Date createdDate;
+    private String title;
+    private String artist;
+    private Long playDuration;
+    @ManyToMany
+    private Collection<MusicList> containedLists;
 }
-
