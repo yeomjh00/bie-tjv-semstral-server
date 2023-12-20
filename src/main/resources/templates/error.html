@@ -4,13 +4,12 @@
 <body>
 
 <div class="container">
-    <div>
         <h1>Error Occurred!</h1>
-        <p th:text=$"errorStatment"></p>
+        <p>Sorry, a error has occurred.</p>
+        <p>Error content is <span th:text=$"{errorMessage}">hello</span></p>
         <p>
             <a href="/">Return to Home</a>
         </p>
-    </div>
 </div>
 
 </body>

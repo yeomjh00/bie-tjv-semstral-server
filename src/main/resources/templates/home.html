@@ -7,10 +7,16 @@
     <div>
         <h1>Hello Spring</h1>
         <p>회원 기능</p>
-        <p>
-            <a href="/users/new">회원 가입</a>
-            <a href="/users/userList">회원 목록</a>
-        </p>
+        <p><a href="/users/new">회원 가입</a></p>
+        <p><a href="/users/userList">회원 목록</a></p>
+        <p><a href="/posts/postList">게시물 목록</a></p>
+        <p><a href="/posts/new">새 게시물 작성</a></p>
+
+        <form action="/" method="post">
+                <label for="userId">Insert your ID for user page</label>
+                <input type="text" id="userId" name="userId" placeholder="Insert Your ID">
+            <button type="submit">Move to your page</button>
+        </form>
     </div>
 </div>
 

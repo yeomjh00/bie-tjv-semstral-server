@@ -5,11 +5,11 @@
     <title>Personal Page</title>
 </head>
 <body>
-<a th:href=$"/@{user.user_id}/edit">Edit data</a>
+<a th:href=$"/@{user.id}/edit">Edit data</a>
 <p>user name: $[[user.username]]</p>
 <p>name: $[[user.realName]]</p>
-<a th:href=$"/@{user.user_id}/posts">See My Posts</a>
-<a th:href=$"/@{user.user_id}/liked">See Liked Posts</a>
-<a th:href=$"/@{user.user_id}/liked">See My Music Lists</a>
+<a th:href=$"/@{user.id}/posts">See My Posts</a>
+<a th:href=$"/@{user.id}/liked">See Liked Posts</a>
+<a th:href=$"/@{user.id}/liked">See My Music Lists</a>
 </body>
 </html>
