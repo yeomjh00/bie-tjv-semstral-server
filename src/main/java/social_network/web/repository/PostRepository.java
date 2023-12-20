@@ -8,8 +8,10 @@ import social_network.web.domain.User;
 import java.util.List;
 import java.util.Optional;
 
-public interface PostRepository{
+public interface PostRepository extends CrudRepository<Post, Long>{
     List<Post> findByAuthor(User author);
     @Query("SELECT p FROM Post p WHERE p.title LIKE %:pattern%")
     List<Post> findByPattern(@Param("pattern") String pattern);
+
+    void updatePostById(Long id, Post post);
 }

@@ -1,6 +1,5 @@
 package social_network.web.repository;
 
-import org.springframework.stereotype.Repository;
 import social_network.web.domain.User;
 
 import java.util.Optional;
