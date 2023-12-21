@@ -1,11 +1,15 @@
 package social_network.web.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import social_network.web.controller.asset.UserRegisterForm;
+import social_network.web.domain.Post;
 import social_network.web.domain.User;
+import social_network.web.repository.PostRepository;
 import social_network.web.repository.UserJpaRepository;
 import social_network.web.repository.UserRepository;
 
@@ -44,10 +48,20 @@ public class UserService implements CrudService<User, Long> {
         return userRepository.findById(id);
     }
 
+    public User findByIdOrThrow(Long id){
+        User u = findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return u;
+    }
+
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }
+
+    public List<Post> findMyPostsByUserId(Long id){ return userRepository.findMyPostsById(id); }
+
+    public List<Post> findLikedPostsByUserId(Long id){ return userRepository.findLikedPostsById(id); }
 
     @Override
     public void deleteById(Long id) { userRepository.deleteById(id); }
