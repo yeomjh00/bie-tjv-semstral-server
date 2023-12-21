@@ -11,6 +11,7 @@ public class CommonExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handle400(IllegalArgumentException e, Model model){
+        log.info("400 error: {}", e.getMessage());
         model.addAttribute("errorMessage", e.getMessage());
         return "/error";
     }

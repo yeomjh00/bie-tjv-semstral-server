@@ -15,6 +15,7 @@ public class BadRequestHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handle404(NoHandlerFoundException e, Model model){
+        log.info("404 error: {}", e.getMessage());
         model.addAttribute("errorMessage", e.getMessage());
         return "/error";
     }
@@ -22,6 +23,7 @@ public class BadRequestHandler {
     @ExceptionHandler(InvalidAccessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handle400(InvalidAccessException e, Model model){
+        log.info("400 error: {}", e.getMessage());
         model.addAttribute("errorMessage", e.getMessage());
         return "/error";
     }
