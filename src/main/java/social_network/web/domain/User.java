@@ -1,21 +1,27 @@
 package social_network.web.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.mapping.Set;
+import social_network.web.controller.asset.UserRegisterForm;
 
 import java.util.Collection;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userid")
     private Long id;
+    @Column(unique = true, nullable = false)
     private String username;
+    @Column(nullable = false)
     private String realName;
     private String userStatus;
     private String introduction;

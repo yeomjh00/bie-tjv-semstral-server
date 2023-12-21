@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import social_network.web.controller.asset.UserRegisterForm;
 import social_network.web.domain.User;
 import social_network.web.repository.UserJpaRepository;
 import social_network.web.repository.UserRepository;
@@ -24,8 +25,18 @@ public class UserService implements CrudService<User, Long> {
     @Override
     public User save(User user) {
         duplicateAndNullCheck(user);
+        userStatusValidCheck(user);
         userRepository.save(user);
         return user;
+    }
+
+    public User saveFromDto(UserRegisterForm userRegisterForm){
+        var user = new User();
+        user.setUsername(userRegisterForm.getUsername());
+        user.setRealName(userRegisterForm.getRealName());
+        user.setIntroduction(userRegisterForm.getIntroduction());
+        user.setUserStatus(userRegisterForm.getUserStatus());
+        return save(user);
     }
 
     @Override
@@ -39,10 +50,7 @@ public class UserService implements CrudService<User, Long> {
     }
 
     @Override
-    public void deleteById(Long id) {
-        userRepository.deleteById(id);
-        return;
-    }
+    public void deleteById(Long id) { userRepository.deleteById(id); }
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -73,6 +81,16 @@ public class UserService implements CrudService<User, Long> {
         else if (user.getRealName().length() > 255 ||
                 user.getRealName().isEmpty()){
             throw new IllegalArgumentException("Real name must be less than 255 characters and not empty");
+        }
+    }
+
+    public void userStatusValidCheck(User user){
+        if (user.getUserStatus().equals("trial") ||
+                user.getUserStatus().equals("membership")){
+            return;
+        }
+        else{
+            throw new IllegalArgumentException("User status must be trial or membership");
         }
     }
 }
