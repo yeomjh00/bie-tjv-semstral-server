@@ -29,7 +29,7 @@ public class User {
     private Collection<Post> myPosts;
 
     @ManyToMany(mappedBy = "likes")
-    private Collection<Post> likedByMe;
+    private Collection<Post> likedPosts;
 
     @OneToMany(mappedBy = "owner")
     private Collection<MusicList> myMusicLists;
