@@ -1,11 +1,14 @@
 package social_network.web.service;
 
+import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.AssertionFailure;
 import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
 import social_network.web.controller.asset.UserRegisterForm;
 import social_network.web.domain.Post;
 import social_network.web.domain.User;
@@ -43,6 +46,11 @@ public class UserService implements CrudService<User, Long> {
         return save(user);
     }
 
+    //@NotImplemented
+    public User updateUserIfIdMatched(User user){
+        return user;
+    }
+
     @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
@@ -58,10 +66,6 @@ public class UserService implements CrudService<User, Long> {
     public List<User> findAll() {
         return userRepository.findAll();
     }
-
-    public List<Post> findMyPostsByUserId(Long id){ return userRepository.findMyPostsById(id); }
-
-    public List<Post> findLikedPostsByUserId(Long id){ return userRepository.findLikedPostsById(id); }
 
     @Override
     public void deleteById(Long id) { userRepository.deleteById(id); }
@@ -96,6 +100,18 @@ public class UserService implements CrudService<User, Long> {
                 user.getRealName().isEmpty()){
             throw new IllegalArgumentException("Real name must be less than 255 characters and not empty");
         }
+    }
+
+    public boolean CheckValidityAndDuplicate(User user){
+        if (user == null){
+            throw new NullPointerException("User is null");
+        }
+        boolean usernameExists = existsByUsername(user.getUsername());
+        boolean usernameLengthInvalid = user.getUsername().length() > 255 ||
+                user.getUsername().isEmpty();
+        boolean realNameLengthInvalid = user.getRealName().length() > 255 ||
+                user.getRealName().isEmpty();
+        return !usernameExists && !usernameLengthInvalid && !realNameLengthInvalid;
     }
 
     public void userStatusValidCheck(User user){
