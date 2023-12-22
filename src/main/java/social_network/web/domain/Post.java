@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 // post_id / author_user_id / content / replyTo_post_id / title
@@ -23,11 +24,18 @@ public class Post {
     private String title;
     private String content;
     @ManyToMany
-    private Collection<User> likes;
+    private List<User> likes;
 
     @OneToMany
-    private Collection<Picture> pictures;
+    private List<Picture> pictures;
 
     @OneToMany
-    private Collection<Music> songs;
+    private List<Music> songs;
+
+    public boolean equals(Post post){
+        return this.id.equals(post.getId())
+                && this.author.equals(post.getAuthor())
+                && this.title.equals(post.getTitle())
+                && this.content.equals(post.getContent());
+    }
 }

@@ -17,4 +17,13 @@ public class Picture{
     private String description;
     private Double height;
     private Double width;
+
+    public boolean equals(Picture picture){
+        return this.id.equals(picture.getId())
+                && this.uri.equals(picture.getUri())
+                && this.title.equals(picture.getTitle())
+                && this.description.equals(picture.getDescription())
+                && this.height.equals(picture.getHeight())
+                && this.width.equals(picture.getWidth());
+    }
 }

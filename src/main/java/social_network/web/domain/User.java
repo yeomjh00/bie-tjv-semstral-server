@@ -9,6 +9,7 @@ import org.hibernate.mapping.Set;
 import social_network.web.controller.asset.UserRegisterForm;
 
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -26,18 +27,26 @@ public class User {
     private String userStatus;
     private String introduction;
     @OneToMany(mappedBy = "author")
-    private Collection<Post> myPosts;
+    private List<Post> myPosts;
 
     @ManyToMany(mappedBy = "likes")
-    private Collection<Post> likedPosts;
+    private List<Post> likedPosts;
 
     @OneToMany(mappedBy = "owner")
-    private Collection<MusicList> myMusicLists;
+    private List<MusicList> myMusicLists;
 
     public void setUserStatusTrial(){
         this.setUserStatus("trial");
     }
     public void setUserStatusMembership(){
         this.setUserStatus("membership");
+    }
+
+    public boolean equals(User user){
+        return this.id.equals(user.getId())
+                && this.username.equals(user.getUsername())
+                && this.realName.equals(user.getRealName())
+                && this.userStatus.equals(user.getUserStatus())
+                && this.introduction.equals(user.getIntroduction());
     }
 }
