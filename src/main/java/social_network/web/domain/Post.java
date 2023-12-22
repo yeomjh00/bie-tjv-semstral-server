@@ -1,8 +1,7 @@
 package social_network.web.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,6 +10,8 @@ import java.util.Optional;
 // post_id / author_user_id / content / replyTo_post_id / title
 @Entity
 @Table(name = "posts")
+@NoArgsConstructor @AllArgsConstructor
+@Builder
 @Getter @Setter
 public class Post {
     @Id

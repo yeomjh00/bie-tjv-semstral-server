@@ -1,10 +1,7 @@
 package social_network.web.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.mapping.Set;
 import social_network.web.controller.asset.UserRegisterForm;
 
@@ -14,6 +11,7 @@ import java.util.List;
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@Builder
 @Table(name = "users")
 public class User {
     @Id
