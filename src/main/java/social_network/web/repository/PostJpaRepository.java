@@ -15,7 +15,12 @@ public interface PostJpaRepository extends JpaRepository<Post, Long>, PostReposi
     void updatePostById(Long id, Post post);
 
     @Override
+    @Query("SELECT p FROM Post p WHERE p.author.id = ?1")
     List<Post> findAllByAuthorId(Long id);
+
+    @Override
+    @Query("SELECT p FROM Post p WHERE p.author.username = ?1")
+    public List<Post> findAllByAuthorUsername(String username);
 
     @Override
     public List<Post> findLikedPostsByAuthorId(Long id);

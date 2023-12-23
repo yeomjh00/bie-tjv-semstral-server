@@ -20,5 +20,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
     void updatePostById(Long id, Post post);
 
+    public List<Post> findAllByAuthorUsername(String username);
+
     void deleteByAuthorId(Long id);
 }
