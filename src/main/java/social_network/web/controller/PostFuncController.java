@@ -27,6 +27,8 @@ public class PostFuncController {
 
     public static final String newPost = "/users/{id}/newpost";
     public static final String editSpecificPost = "/users/{id}/myposts/{postId}/edit";
+
+    public static final String deleteSpecificPost = "/users/{id}/myposts/{postId}/delete";
     public static final String likePost = "/posts/{postId}/like";
 
 
@@ -69,7 +71,7 @@ public class PostFuncController {
         User user = userService.findByIdOrThrow(id);
         model.addAttribute("post", post);
         model.addAttribute("user", user);
-        return "posts/editpost";
+        return "posts/edit";
     }
 
     @PostMapping(editSpecificPost)
@@ -77,6 +79,14 @@ public class PostFuncController {
         Post post = postService.findByIdOrThrow(postId);
         Post updatedPost = postService.updatePostFromDto(form);
         log.info("Editing specific post");
-        return "redirect:/users/" + id + "/myposts/";
+        return "redirect:/users/" + id + "/myposts";
+    }
+
+
+    @GetMapping(deleteSpecificPost)
+    public String deleteSpecificPost(Model model, @PathVariable Long id, @PathVariable Long postId){
+        log.info("Deleting specific post");
+        postService.deleteById(postId);
+        return "redirect:/users/" + id + "/myposts";
     }
 }

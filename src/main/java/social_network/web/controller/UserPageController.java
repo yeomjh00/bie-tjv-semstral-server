@@ -65,24 +65,28 @@ public class UserPageController {
     }
 
     @PostMapping(userPageEdit)
-    public String userPageEditPost(@PathVariable Long id, @RequestParam UserRegisterForm form){
+    public String userPageEditPost(@PathVariable Long id, UserRegisterForm form){
         User user = userService.findByIdOrThrow(id);
-        user.setRealName(form.getRealName());
-        user.setUsername(form.getUsername());
-        if(userService.CheckValidityAndDuplicate(user)){
+        User editedUser = User.builder()
+                .username(form.getUsername())
+                .realName(user.getRealName())
+                .introduction(form.getIntroduction())
+                .build();
+
+        if(userService.CheckValidityAndDuplicate(editedUser)){
             log.info("Valid for modifying user information!");
 
+            user.setUsername(form.getUsername());
             if (null == form.getUserStatus()){
                 user.setUserStatusTrial();
             } else{
                 user.setUserStatusMembership();
             }
-
-            user.setIntroduction(form.getIntroduction());
-
             userResourceService.updateUserInfoByUserId(id, user);
+
             return "redirect:/users/"+id;
         }
+        log.info("Invalid for modifying user information!");
         return "redirect:/users/"+id+"/edit";
     }
 
@@ -94,9 +98,11 @@ public class UserPageController {
         return "users/withdrawal";
     }
 
-    @PostMapping("/users/{id}/withdrawal")
+    @PostMapping(userWithdrawal)
     public String userPageDeletePost(@PathVariable Long id, @RequestParam String confirm){
         User user = userService.findByIdOrThrow(id);
+        log.info("Confirmation Statement: {}", confirm);
+        log.info("Actual Statement: {}", "withdraw "+ user.getUsername());
         if (confirm.equals("withdraw "+ user.getUsername())) {
             userResourceService.deleteUserInfoByUserId(id);
             return "redirect:/";
@@ -105,26 +111,4 @@ public class UserPageController {
             return "redirect:/users/"+id+"/withdrawal";
     }
 
-
-    // TODO: userPosts and likedByUser should return different data
-    // But It eventually rendered with same structure.
-    @GetMapping("/users/{id}/myposts")
-    public String userPosts(Model model, @PathVariable Long id){
-        User user = userService.findByIdOrThrow(id);
-        List<Post> posts = postService.findMyPostsByUserId(id);
-        log.info("#posts of {}: {}", id, posts.size());
-        model.addAttribute("posts", posts);
-        return "users/myposts";
-    }
-
-    @GetMapping(likedByUser)
-    public String likedByUser(Model model, @PathVariable Long id){
-        User user = userService.findByIdOrThrow(id);
-        List<Post> posts = postService.findLikedPostsByUserId(id);
-        log.info("#liked posts of {}: {}", id, posts.size());
-        model.addAttribute("posts", posts);
-        return "users/likedposts";
-    }
-
-    //@GetMapping(userMusicLists)
 }

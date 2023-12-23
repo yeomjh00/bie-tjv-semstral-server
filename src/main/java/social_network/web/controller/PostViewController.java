@@ -20,7 +20,7 @@ public class PostViewController {
     private final PostService postService;
     private final UserService userService;
 
-    public static final String allPosts = "/posts/postList";
+    public static final String allPosts = "/posts/{id}/postList";
 
     public static final String specificPost = "/posts/{postId}";
 
@@ -35,10 +35,10 @@ public class PostViewController {
     }
 
     @GetMapping(allPosts)
-    public String viewAllPosts(Model model){
+    public String viewAllPosts(Model model, @PathVariable Long id){
         model.addAttribute("posts", postService.findAll());
         log.info("Viewing all posts");
-        return allPosts;
+        return "posts/postList";
     }
 
     @GetMapping(specificPost)
@@ -61,12 +61,15 @@ public class PostViewController {
 
     @GetMapping(allMyPosts)
     public String viewAllMyPosts(Model model, @PathVariable Long id){
+        log.info("1");
         var user = userService.findByIdOrThrow(id);
+        log.info("2");
         var myposts = postService.findAllByAuthorId(user.getId());
+        log.info("3");
         model.addAttribute("user", user);
         model.addAttribute("posts", myposts);
         log.info("Viewing all my posts");
-        return "posts/viewMyPosts";
+        return "/users/myposts";
     }
 
     @GetMapping(likedPosts)
@@ -75,6 +78,6 @@ public class PostViewController {
         model.addAttribute("user", user);
         model.addAttribute("posts", postService.findLikedPostsByUserId(id));
         log.info("Viewing all my posts");
-        return "posts/viewMyPosts";
+        return "posts/postList";
     }
 }
