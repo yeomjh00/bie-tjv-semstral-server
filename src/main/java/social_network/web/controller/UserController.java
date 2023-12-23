@@ -31,10 +31,8 @@ public class UserController {
     }
 
 
-    // TODO: 2023-12-14: remove model Attribute
     @GetMapping(userRegister)
     public String createForm(Model model){
-        model.addAttribute("userRegisterForm", userRegister);
         return userRegister;
     }
 

@@ -37,7 +37,7 @@ with `MusicList`:
   - Music: Media contained in this post. can contain multiple musics / List\<Music> / Null
 
 ### Relation
-with `Uesr`: see User Section
+with `User`: see User Section
 
 with `Picture`, `Music`:
  - One-to-Many Relation: Single media file can be indicated by multiple Posts

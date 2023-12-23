@@ -13,5 +13,14 @@ public interface PostRepository extends CrudRepository<Post, Long>{
     @Query("SELECT p FROM Post p WHERE p.title LIKE %:pattern%")
     List<Post> findByPattern(@Param("pattern") String pattern);
 
+    List<Post> findAllByAuthorId(Long id);
+
+    public List<Post> findLikedPostsByAuthorId(Long id);
+    public List<Post> findLikesByAuthorId(Long id);
+
     void updatePostById(Long id, Post post);
+
+    public List<Post> findAllByAuthorUsername(String username);
+
+    void deleteByAuthorId(Long id);
 }

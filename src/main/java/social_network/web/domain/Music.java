@@ -22,4 +22,13 @@ public class Music{
     private Long playDuration;
     @ManyToMany
     private Collection<MusicList> containedLists;
+
+    public boolean equals(Music music){
+        return this.id.equals(music.getId())
+                && this.uri.equals(music.getUri())
+                && this.description.equals(music.getDescription())
+                && this.title.equals(music.getTitle())
+                && this.artist.equals(music.getArtist())
+                && this.playDuration.equals(music.getPlayDuration());
+    }
 }
