@@ -3,6 +3,7 @@ package social_network.web.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import social_network.web.domain.Post;
 import social_network.web.domain.User;
 import social_network.web.repository.PostRepository;
@@ -24,6 +25,7 @@ public class UserResourceService {
         this.postRepository = postRepository;
     }
 
+    @Transactional
     public void deleteUserInfoByUserId(Long userId){
         User u = findUserByIdOrThrow(userId);
         postRepository.deleteByAuthorId(userId);
@@ -31,6 +33,7 @@ public class UserResourceService {
         return;
     }
 
+    @Transactional
     public void updateUserInfoByUserId(Long userId, User user){
         User u = findUserByIdOrThrow(userId);
         userRepository.save(user);

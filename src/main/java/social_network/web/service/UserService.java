@@ -111,6 +111,8 @@ public class UserService implements CrudService<User, Long> {
                 user.getUsername().isEmpty();
         boolean realNameLengthInvalid = user.getRealName().length() > 255 ||
                 user.getRealName().isEmpty();
+        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}, realNameLengthInvalid: {}",
+                usernameExists, usernameLengthInvalid, realNameLengthInvalid);
         return !usernameExists && !usernameLengthInvalid && !realNameLengthInvalid;
     }
 
