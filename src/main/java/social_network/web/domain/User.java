@@ -3,6 +3,7 @@ package social_network.web.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.mapping.Set;
+import social_network.web.controller.asset.UserDto;
 import social_network.web.controller.asset.UserRegisterForm;
 
 import java.util.Collection;
@@ -46,5 +47,24 @@ public class User {
                 && this.realName.equals(user.getRealName())
                 && this.userStatus.equals(user.getUserStatus())
                 && this.introduction.equals(user.getIntroduction());
+    }
+
+    public static User Dto2User(UserDto userDto){
+        String userStatus = userDto.getUserStatus().equals("membership") ? "membership" : "trial";
+        return User.builder()
+                .id(userDto.getId())
+                .username(userDto.getUsername())
+                .realName(userDto.getRealName())
+                .userStatus(userStatus)
+                .introduction(userDto.getIntroduction())
+                .build();
+    }
+
+    public void setInfoFromDto(UserDto userDto){
+        String userStatus = userDto.getUserStatus().equals("membership") ? "membership" : "trial";
+        this.username = userDto.getUsername();
+        this.realName = userDto.getRealName();
+        this.userStatus = userStatus;
+        this.introduction = userDto.getIntroduction();
     }
 }

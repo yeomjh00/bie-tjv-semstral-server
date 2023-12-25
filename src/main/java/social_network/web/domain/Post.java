@@ -2,6 +2,7 @@ package social_network.web.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import social_network.web.controller.asset.PostDto;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,5 +39,14 @@ public class Post {
                 && this.author.equals(post.getAuthor())
                 && this.title.equals(post.getTitle())
                 && this.content.equals(post.getContent());
+    }
+
+    public static Post Dto2Post(PostDto postDto, User author){
+        return Post.builder()
+                .id(postDto.getId())
+                .author(author)
+                .title(postDto.getTitle())
+                .content(postDto.getContent())
+                .build();
     }
 }
