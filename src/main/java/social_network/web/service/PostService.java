@@ -29,6 +29,15 @@ public class PostService implements CrudService<Post, Long> {
         return post;
     }
 
+    public boolean verifyTitleAndContent(String title, String content){
+        if (title == null || title.isEmpty() || title.length() > 255){
+            return false;
+        } else if (content == null || content.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
     public Post verifiedSave(Post post){
         if (post.getContent() == null || post.getContent().isEmpty()){
             throw new IllegalArgumentException("Post content cannot be empty");
@@ -38,12 +47,16 @@ public class PostService implements CrudService<Post, Long> {
         return save(post);
     }
 
-    public Post updatePostFromDto(PostRegisterForm form) {
-        Post post = Post.builder()
-                .title(form.getTitle())
-                .content(form.getContent())
-                .build();
-        return verifiedSave(post);
+    public Post updatePostFromDto(Long postId, PostRegisterForm form) {
+        if (verifyTitleAndContent(form.getTitle(), form.getContent())){
+            var post = findByIdOrThrow(postId);
+            post.setTitle(form.getTitle());
+            post.setContent(form.getContent());
+            postRepository.save(post);
+            return post;
+        } else {
+            throw new IllegalArgumentException("Post title cannot be empty and exceed 255 characters");
+        }
     }
 
     @Override
