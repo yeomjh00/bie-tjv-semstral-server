@@ -2,11 +2,8 @@ package social_network.web.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.mapping.Set;
 import social_network.web.controller.asset.UserDto;
-import social_network.web.controller.asset.UserRegisterForm;
 
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -50,7 +47,7 @@ public class User {
     }
 
     public static User Dto2User(UserDto userDto){
-        String userStatus = userDto.getUserStatus().equals("membership") ? "membership" : "trial";
+        String userStatus = "membership".equals(userDto.getUserStatus()) ? "membership" : "trial";
         return User.builder()
                 .id(userDto.getId())
                 .username(userDto.getUsername())

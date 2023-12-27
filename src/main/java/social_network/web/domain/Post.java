@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import social_network.web.controller.asset.PostDto;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 // post_id / author_user_id / content / replyTo_post_id / title
 @Entity
@@ -49,4 +48,11 @@ public class Post {
                 .content(postDto.getContent())
                 .build();
     }
+//    public ArrayList<User> getLikes(){
+//        return (ArrayList<User>) this.likes;
+//    }
+//
+//    public void setLikes(ArrayList<User> likes){
+//        this.likes = (List<User>) likes;
+//    }
 }
