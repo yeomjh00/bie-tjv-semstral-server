@@ -3,11 +3,9 @@ package social_network.web.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import social_network.web.controller.asset.PostRegisterForm;
+import social_network.web.controller.asset.PostDto;
 import social_network.web.domain.Post;
-import social_network.web.domain.User;
 import social_network.web.repository.PostRepository;
-import social_network.web.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +45,7 @@ public class PostService implements CrudService<Post, Long> {
         return save(post);
     }
 
-    public Post updatePostFromDto(Long postId, PostRegisterForm form) {
+    public Post updatePostFromDto(Long postId, PostDto form) {
         if (verifyTitleAndContent(form.getTitle(), form.getContent())){
             var post = findByIdOrThrow(postId);
             post.setTitle(form.getTitle());
@@ -73,6 +71,10 @@ public class PostService implements CrudService<Post, Long> {
     @Override
     public List<Post> findAll() {
         return postRepository.findAll();
+    }
+
+    public List<Post> findSomeonePosts(Long userId){
+        return findAll().stream().filter(post -> post.getAuthor().getId().equals(userId)).toList();
     }
 
     public List<Post> findAllByAuthorId(Long id){

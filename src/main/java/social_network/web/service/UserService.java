@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import social_network.web.controller.asset.UserRegisterForm;
 import social_network.web.domain.User;
 import social_network.web.repository.UserRepository;
 
@@ -32,12 +31,6 @@ public class UserService implements CrudService<User, Long> {
         return userRepository.findById(id);
     }
 
-    public User findByIdOrThrow(Long id){
-        User u = findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return u;
-    }
-
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -61,8 +54,9 @@ public class UserService implements CrudService<User, Long> {
     }
 
     public boolean CheckValidityAndDuplicateAndStatus(User user){
-        if (user == null){
-            throw new NullPointerException("User is null");
+        if (user == null || user.getUsername() == null || user.getRealName() == null || user.getUserStatus() == null){
+            log.info("Null User is trying to be created");
+            return false;
         }
         boolean usernameExists = existsByUsername(user.getUsername());
         boolean usernameLengthInvalid = user.getUsername().length() > 255 ||
@@ -78,5 +72,14 @@ public class UserService implements CrudService<User, Long> {
     public boolean CheckUserStatusValid(User user){
         return user.getUserStatus().equals("trial") ||
                 user.getUserStatus().equals("membership");
+    }
+
+    public boolean CheckUsername(String username) {
+        boolean usernameExists = existsByUsername(username);
+        boolean usernameLengthInvalid = username.length() > 255 ||
+                username.isEmpty();
+        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}",
+                usernameExists, usernameLengthInvalid);
+        return !usernameExists && !usernameLengthInvalid;
     }
 }
