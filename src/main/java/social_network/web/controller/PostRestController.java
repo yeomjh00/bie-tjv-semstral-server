@@ -4,25 +4,33 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import social_network.web.controller.asset.PostDto;
+import social_network.web.domain.Post;
+import social_network.web.domain.User;
 import social_network.web.service.PostService;
+import social_network.web.service.UserResourceService;
+import social_network.web.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
 public class PostRestController {
 
+    private final UserService userService;
     private final PostService postService;
+    private final UserResourceService userResourceService;
 
     @Autowired
-    public PostRestController(PostService postService){
+    public PostRestController(UserService userService,
+                              PostService postService,
+                              UserResourceService userResourceService){
+        this.userService = userService;
         this.postService = postService;
+        this.userResourceService = userResourceService;
     }
-
 
     @GetMapping("/posts")
     public List<PostDto> readAllPosts(){
@@ -32,13 +40,93 @@ public class PostRestController {
                 .toList();
     }
 
+    @PostMapping("/posts")
+    public HttpStatus createPost(@RequestBody PostDto postDto){
+        log.info("create post: {}", postDto);
+        Optional<User> user = userService.findById(postDto.getUserId());
+        if (user.isEmpty()){
+            log.info("user not found");
+            return HttpStatus.NOT_FOUND;
+        }
+        postService.save(Post.Dto2Post(postDto, user.get()));
+        return HttpStatus.CREATED;
+    }
+
     @GetMapping("/posts/{post_id}")
-    public ResponseEntity<PostDto> readPostById(Long post_id){
+    public ResponseEntity<PostDto> readPostById(@PathVariable Long post_id){
         log.info("read post by id: {}", post_id);
-        // Post2Dto handles null
         PostDto result = PostDto.Post2Dto(postService.findById(post_id).orElse(null));
-        HttpStatus status = result.getId() == -1 ? HttpStatus.NOT_FOUND : HttpStatus.OK;
+        HttpStatus status = result == null ? HttpStatus.NOT_FOUND : HttpStatus.OK;
         return ResponseEntity.status(status).body(result);
     }
-}
 
+    @PutMapping("/posts/{post_id}")
+    public ResponseEntity<PostDto> updatePost(@PathVariable Long post_id, @RequestBody PostDto postDto){
+        log.info("try to update post: {}", postDto);
+        Optional<Post> post = postService.findById(post_id);
+        if (post.isEmpty()){
+            log.info("post not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Post p = post.get();
+        p.setContent(postDto.getContent());
+        p.setTitle(postDto.getTitle());
+        // TODO: add media
+        postService.save(p);
+        return ResponseEntity.status(HttpStatus.OK).body(PostDto.Post2Dto(p));
+    }
+
+    @DeleteMapping("/posts/{post_id}")
+    public void deletePost(@PathVariable Long post_id){
+        Optional<Post> post = postService.findById(post_id);
+        if (post.isEmpty()){
+            log.info("post not found");
+            return;
+        }
+        log.info("delete post by id: {}", post_id);
+        postService.deleteById(post_id);
+    }
+
+    @GetMapping("/posts/owned")
+    public List<PostDto> readSomeonePosts(@RequestParam Long user_id){
+        log.info("read all posts");
+        return postService.findSomeonePosts(user_id)
+                .stream()
+                .map(PostDto::Post2Dto)
+                .toList();
+    }
+
+    @GetMapping("/posts/liked")
+    public List<PostDto> readLikedPostsByUserId(@RequestParam Long user_id){
+        log.info("read all posts");
+        return userResourceService.findLikedPosts(user_id).stream()
+                .map(PostDto::Post2Dto)
+                .toList();
+    }
+
+
+    // TODO
+    @PostMapping("/posts/{post_id}/like")
+    public void likePost(@RequestParam Long user_id, @PathVariable Long post_id){
+        log.info("try: like post");
+        Optional<User> user = userService.findById(user_id);
+        if (user.isEmpty()){
+            log.info("user not found");
+            return;
+        }
+        userResourceService.likePost(user_id, post_id);
+    }
+
+    //TODO
+    @DeleteMapping("/posts/{post_id}/like")
+    public void unlikePost(@RequestParam Long user_id, @PathVariable Long post_id){
+        log.info("try: unlike post");
+        Optional<User> user = userService.findById(user_id);
+        if (user.isEmpty()){
+            log.info("user not found");
+            return;
+        }
+        userResourceService.unlikePost(user_id, post_id);
+    }
+}

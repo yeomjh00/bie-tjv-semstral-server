@@ -8,6 +8,7 @@ import social_network.web.domain.Post;
 public class PostDto {
     private Long id;
     private String authorUsername;
+    private Long userId;
     private String title;
     private String content;
     private Long numberOfLikes;
@@ -15,19 +16,42 @@ public class PostDto {
     public PostDto(Post post){
         this.id = post.getId();
         this.authorUsername = post.getAuthor().getUsername();
+        this.userId = post.getAuthor().getId();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.numberOfLikes = (long) post.getLikes().size();
     }
 
     public static PostDto Post2Dto(Post post){
-        Long id = post == null ? -1 : post.getId();
         return PostDto.builder()
-                .id(id)
+                .id(post.getId())
                 .authorUsername(post.getAuthor().getUsername())
+                .userId(post.getAuthor().getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .numberOfLikes((long) post.getLikes().size())
+                .build();
+    }
+
+    public static PostDto Post2ShortDto(Post post){
+        return PostDto.builder()
+                .id(post.getId())
+                .authorUsername(post.getAuthor().getUsername())
+                .userId(post.getAuthor().getId())
+                .title(post.getTitle())
+                .content("")
+                .numberOfLikes((long) post.getLikes().size())
+                .build();
+    }
+
+    public static PostDto postNotFound(){
+        return PostDto.builder()
+                .id(-1L)
+                .authorUsername("Post Not Found")
+                .userId(-1L)
+                .title("Post Not Found")
+                .content("Post Not Found")
+                .numberOfLikes(-1L)
                 .build();
     }
 }
