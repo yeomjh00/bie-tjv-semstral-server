@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @Slf4j
 @RestController
+@RequestMapping("/users")
 public class UserRestController {
 
     private final UserService userService;
@@ -28,15 +29,15 @@ public class UserRestController {
         this.userResourceService =  userResoureService;
     }
 
-    @GetMapping("/users")
+    @GetMapping
     public List<UserDto> readAllUsers(){
         log.info("read all users");
         return userService.findAll().stream()
-                .map(UserDto::User2ShortDto)
+                .map(UserDto::User2Dto)
                 .toList();
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
         User user = User.Dto2User(userDto);
         if(userService.CheckValidityAndDuplicateAndStatus(user)){
@@ -47,7 +48,7 @@ public class UserRestController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.userNotFound());
     }
 
-    @GetMapping("/users/{user_id}")
+    @GetMapping("/{user_id}")
     public ResponseEntity<UserDto> readUserById(@PathVariable Long user_id){
         Optional<User> user = userService.findById(user_id);
         log.info("read user by id: {}", user_id);
@@ -58,14 +59,15 @@ public class UserRestController {
         return ResponseEntity.ok(UserDto.User2Dto(user.get()));
     }
 
-    @PutMapping("/users/{user_id}")
+    @PutMapping("/{user_id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long user_id, @RequestBody UserDto userDto){
         Optional<User> user = userService.findById(user_id);
         Optional<User> targetUsername = userService.findByUsername(userDto.getUsername());
         if (user.isEmpty()){ // user not found
             log.info("user not found");
             return ResponseEntity.notFound().build();
-        } else if(targetUsername.isPresent()){ // username already exists
+        } else if(targetUsername.isPresent()
+                && !targetUsername.get().getId().equals(user.get().getId())){ // username already exists
             log.info("username already exists");
             return ResponseEntity.badRequest().build();
         } else {
@@ -77,7 +79,7 @@ public class UserRestController {
         }
     }
 
-    @DeleteMapping("/users/{user_id}")
+    @DeleteMapping("/{user_id}")
     public void deleteUser(@PathVariable Long user_id){
         Optional<User> user = userService.findById(user_id);
         if (user.isEmpty()){
