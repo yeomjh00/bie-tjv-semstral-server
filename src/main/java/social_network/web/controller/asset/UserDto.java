@@ -24,17 +24,6 @@ public class UserDto {
                 .build();
     }
 
-    public static UserDto User2ShortDto(User user){
-        if (user == null) return userNotFound();
-        return UserDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .realName(user.getRealName())
-                .userStatus(user.getUserStatus())
-                .introduction("")
-                .build();
-    }
-
     public static UserDto userNotFound(){
         return UserDto.builder()
                 .id(-1L)
@@ -42,6 +31,26 @@ public class UserDto {
                 .realName("User Not Found")
                 .userStatus("User Not Found")
                 .introduction("User Not Found")
+                .build();
+    }
+
+    public static UserDto duplicatedUserName(){
+        return UserDto.builder()
+                .id(-1L)
+                .username("Duplicated User Name")
+                .realName("Duplicated User Name")
+                .userStatus("Duplicated User Name")
+                .introduction("Duplicated User Name")
+                .build();
+    }
+
+    public static UserDto invalidUserName(){
+        return UserDto.builder()
+                .id(-1L)
+                .username("Invalid User Name")
+                .realName("Invalid User Name")
+                .userStatus("Invalid User Name")
+                .introduction("Invalid User Name")
                 .build();
     }
 }
