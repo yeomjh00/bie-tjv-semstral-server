@@ -3,9 +3,12 @@ package social_network.web.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import social_network.web.controller.asset.PictureDto;
 import social_network.web.controller.asset.PostDto;
+import social_network.web.domain.Picture;
 import social_network.web.domain.Post;
 import social_network.web.repository.PostRepository;
+import social_network.web.repository.media.PictureRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,13 +19,20 @@ public class PostService implements CrudService<Post, Long> {
 
 
     private final PostRepository postRepository;
+    private final PictureRepository pictureRepository;
 
-    public PostService(@Autowired PostRepository postRepository) {
+    @Autowired
+    public PostService(PostRepository postRepository,
+                       PictureRepository pictureRepository) {
         this.postRepository = postRepository;
+        this.pictureRepository = pictureRepository;
     }
 
     @Override
     public Post save(Post post) {
+        for(Picture photo: post.getPictures()){
+            pictureRepository.save(photo);
+        }
         postRepository.save(post);
         return post;
     }
@@ -50,6 +60,7 @@ public class PostService implements CrudService<Post, Long> {
             var post = findByIdOrThrow(postId);
             post.setTitle(form.getTitle());
             post.setContent(form.getContent());
+            updatePhotos(post, form.getPictureDtos());
             postRepository.save(post);
             return post;
         } else {
@@ -103,4 +114,17 @@ public class PostService implements CrudService<Post, Long> {
 
     public List<Post> findLikedPostsByUserId(Long id){ return postRepository.findLikesByAuthorId(id); }
 
+    public void deleteAll() {
+        postRepository.deleteAll();
+    }
+
+    private void updatePhotos(Post post, List<PictureDto> photos){
+        for(Picture photo: post.getPictures()){
+            pictureRepository.deleteById(photo.getId());
+        }
+
+        for(PictureDto photo : photos){
+            pictureRepository.save(Picture.Dto2Picture(photo));
+        }
+    }
 }
