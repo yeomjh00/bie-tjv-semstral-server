@@ -42,11 +42,12 @@ public class PostRestController {
     }
 
     @GetMapping("/posts")
-    public List<PostDto> readAllPosts(){
+    public ResponseEntity<List<PostDto>> readAllPosts(){
         log.info("read all posts");
-        return postService.findAll().stream()
+        List<PostDto> posts = postService.findAll().stream()
                 .map(PostDto::Post2Dto)
                 .toList();
+        return ResponseEntity.ok(posts);
     }
 
     @PostMapping("/posts")
@@ -111,20 +112,22 @@ public class PostRestController {
     }
 
     @GetMapping("/posts/owned")
-    public List<PostDto> readSomeonePosts(@RequestParam Long user_id){
+    public ResponseEntity<List<PostDto>> readSomeonePosts(@RequestParam Long user_id){
         log.info("read all posts");
-        return postService.findSomeonePosts(user_id)
-                .stream()
+        List<PostDto> posts = postService.findSomeonePosts(user_id).stream()
                 .map(PostDto::Post2Dto)
                 .toList();
+        return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/posts/liked")
-    public List<PostDto> readLikedPostsByUserId(@RequestParam Long user_id){
+    public ResponseEntity<List<PostDto>> readLikedPostsByUserId(@RequestParam Long user_id){
         log.info("read all posts");
-        return userResourceService.findLikedPosts(user_id).stream()
+        List<PostDto> posts = postService.findAll().stream()
+                .filter(post -> post.getLikes().stream().anyMatch(user -> user.getId().equals(user_id)))
                 .map(PostDto::Post2Dto)
                 .toList();
+        return ResponseEntity.ok(posts);
     }
 
     @PostMapping("/posts/{post_id}/like")

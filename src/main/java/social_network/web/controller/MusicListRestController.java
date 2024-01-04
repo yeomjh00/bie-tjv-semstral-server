@@ -2,6 +2,8 @@ package social_network.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import social_network.web.controller.asset.MusicListDto;
 import social_network.web.domain.MusicList;
@@ -28,23 +30,35 @@ public class MusicListRestController {
     }
 
     @GetMapping
-    public List<MusicListDto> readAllMusicLists(){
+    public ResponseEntity<List<MusicListDto>> readAllMusicLists(){
         log.info("read all music lists");
-        return musicListService.findAll().stream()
+        List<MusicListDto> lists = musicListService.findAll().stream()
                 .map(MusicListDto::MusicList2Dto)
                 .toList();
+        return ResponseEntity.ok(lists);
     }
 
     @PostMapping
-    public void createMusicList(@RequestBody MusicListDto musicListDto){
+    public HttpStatus createMusicList(@RequestBody MusicListDto musicListDto){
         log.info("create music list: {}", musicListDto);
-        musicListService.saveFromDto(musicListDto);
+        MusicList response = musicListService.saveFromDto(musicListDto);
+        if (response == null){
+            log.info("music list not created");
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return HttpStatus.CREATED;
     }
 
     @GetMapping("/{music-list-id}")
-    public MusicListDto readMusicListById(@PathVariable("music-list-id") Long mlId){
+    public ResponseEntity<MusicListDto> readMusicListById(@PathVariable("music-list-id") Long mlId){
         log.info("read music list by id: {}", mlId);
-        return MusicListDto.MusicList2Dto(musicListService.findById(mlId).orElse(null));
+        Optional<MusicList> musicList = musicListService.findById(mlId);
+        if (musicList.isEmpty()){
+            log.info("music list not found");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(MusicListDto.MusicList2Dto(musicList.get()));
+
     }
 
     @PutMapping("/{music-list-id}")
@@ -66,22 +80,35 @@ public class MusicListRestController {
     }
 
     @GetMapping("/owned")
-    public List<MusicListDto> readAllMusicListsByOwnerId(@RequestParam Long user_id){
+    public ResponseEntity<List<MusicListDto>> readAllMusicListsByOwnerId(@RequestParam Long user_id){
         log.info("read all music lists by owner id: {}", user_id);
-        return musicListService.findAllByOwnerId(user_id).stream()
-                .map(MusicListDto::MusicList2Dto)
-                .toList();
+        List<MusicList> lists = musicListService.findAllByOwnerId(user_id);
+        if (lists.isEmpty()){
+            log.info("music lists not found");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(lists.stream().map(MusicListDto::MusicList2Dto).toList());
     }
 
     @GetMapping("/count-list")
-    public Long countListsByUserId(@RequestParam Long user_id){
+    public ResponseEntity<Long> countListsByUserId(@RequestParam Long user_id){
         log.info("count music by music list id: {}", user_id);
-        return musicListService.countListByUserId(user_id);
+        Long listCount = musicListService.countListByUserId(user_id);
+        if (listCount == null){
+            log.info("user not found");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(listCount);
     }
 
     @GetMapping("/count-music")
-    public Long countMusicByMusicListId(@RequestParam Long list_id){
+    public ResponseEntity<Long> countMusicByMusicListId(@RequestParam Long list_id){
         log.info("count music by music list id: {}", list_id);
-        return musicListService.countMusicByMusicListId(list_id);
+        Long musicCount = musicListService.countMusicByMusicListId(list_id);
+        if (musicCount == null){
+            log.info("music list not found");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(musicCount);
     }
 }

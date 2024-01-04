@@ -21,6 +21,7 @@ public class MusicListDto {
     private List<MusicDto> track;
 
     public static MusicListDto MusicList2Dto(MusicList musicList){
+        if (musicList == null) return null;
         return MusicListDto.builder()
                 .id(musicList.getId())
                 .listName(musicList.getListName())

@@ -30,11 +30,12 @@ public class UserRestController {
     }
 
     @GetMapping
-    public List<UserDto> readAllUsers(){
+    public ResponseEntity<List<UserDto>> readAllUsers(){
         log.info("read all users");
-        return userService.findAll().stream()
+        List<UserDto> users = userService.findAll().stream()
                 .map(UserDto::User2Dto)
                 .toList();
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping

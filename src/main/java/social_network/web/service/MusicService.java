@@ -48,8 +48,8 @@ public class MusicService implements CrudService<Music, Long>{
         return musicRepository.countMusicByMusicListId(listId);
     }
 
-    public void saveFromDto(MusicDto musicDto) {
+    public Music saveFromDto(MusicDto musicDto) {
         var music = Music.Dto2Music(musicDto);
-        musicRepository.save(music);
+        return musicRepository.save(music);
     }
 }

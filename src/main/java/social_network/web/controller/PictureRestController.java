@@ -2,6 +2,8 @@ package social_network.web.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import social_network.web.controller.asset.PictureDto;
 import social_network.web.domain.Picture;
@@ -10,6 +12,7 @@ import social_network.web.service.PostService;
 import social_network.web.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -26,23 +29,34 @@ public class PictureRestController {
     }
 
     @GetMapping
-    public List<PictureDto> readAllPictures(){
+    public ResponseEntity<List<PictureDto>> readAllPictures(){
         log.info("read all pictures");
-        return pictureService.findAll().stream()
+        List<PictureDto> pictures = pictureService.findAll().stream()
                 .map(PictureDto::Picture2Dto)
                 .toList();
+        return ResponseEntity.ok(pictures);
     }
 
     @PostMapping
-    public void createPicture(@RequestBody PictureDto pictureDto){
+    public HttpStatus createPicture(@RequestBody PictureDto pictureDto){
         log.info("create picture: {}", pictureDto);
-        pictureService.save(Picture.Dto2Picture(pictureDto));
+        Picture response = pictureService.save(Picture.Dto2Picture(pictureDto));
+        if (response == null){
+            log.info("picture not created");
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return HttpStatus.CREATED;
     }
 
     @GetMapping("/{picture-id}")
-    public PictureDto readPictureById(@PathVariable("picture-id") Long pId){
+    public ResponseEntity<PictureDto> readPictureById(@PathVariable("picture-id") Long pId){
         log.info("read picture by id: {}", pId);
-        return PictureDto.Picture2Dto(pictureService.findById(pId).orElse(null));
+        Optional<Picture> picture = pictureService.findById(pId);
+        if (picture.isEmpty()){
+            log.info("picture not found");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(PictureDto.Picture2Dto(picture.get()));
     }
 
     @PutMapping("/{picture-id}")
@@ -59,10 +73,13 @@ public class PictureRestController {
     }
 
     @GetMapping("/contained")
-    public List<PictureDto> readAllPicturesByContainedPostId(@RequestParam Long post_id){
+    public ResponseEntity<List<PictureDto>> readAllPicturesByContainedPostId(@RequestParam Long post_id){
         log.info("read all pictures by contained post id: {}", post_id);
-        return pictureService.findAllByPostId(post_id).stream()
-                .map(PictureDto::Picture2Dto)
-                .toList();
+        List<Picture> pictures = pictureService.findAllByPostId(post_id);
+        if (pictures.isEmpty()){
+            log.info("pictures not found");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(pictures.stream().map(PictureDto::Picture2Dto).toList());
     }
 }
