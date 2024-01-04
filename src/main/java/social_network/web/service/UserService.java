@@ -22,6 +22,8 @@ public class UserService implements CrudService<User, Long> {
 
     @Override
     public User save(User user) {
+        log.info("save user with username: {}, realName: {}, userStatus: {}, introduction: {}",
+                user.getUsername(), user.getRealName(), user.getUserStatus(), user.getIntroduction());
         userRepository.save(user);
         return user;
     }
