@@ -44,13 +44,21 @@ public class UserDto {
                 .build();
     }
 
-    public static UserDto invalidUserName(){
+    public static UserDto invalidName(){
         return UserDto.builder()
                 .id(-1L)
-                .username("Invalid User Name")
-                .realName("Invalid User Name")
-                .userStatus("Invalid User Name")
-                .introduction("Invalid User Name")
+                .username("Invalid Name")
+                .realName("Invalid Name")
+                .userStatus("Invalid Name")
+                .introduction("Invalid Name")
                 .build();
+    }
+
+    public boolean equals(UserDto user){
+        return this.id.equals(user.getId())
+                && this.username.equals(user.getUsername())
+                && this.realName.equals(user.getRealName())
+                && this.userStatus.equals(user.getUserStatus())
+                && this.introduction.equals(user.getIntroduction());
     }
 }

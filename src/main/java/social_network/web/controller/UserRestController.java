@@ -40,24 +40,13 @@ public class UserRestController {
 
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto){
-        User user = User.Dto2User(userDto);
-        if(userService.CheckValidityAndDuplicateAndStatus(user)){
-            log.info("create user: {}", userDto);
-            userService.save(user);
-            return ResponseEntity.ok(UserDto.User2Dto(user));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.duplicatedUserName());
+        log.info("create user: {}", userDto);
+        return userService.createUser(userDto);
     }
 
     @GetMapping("/{user_id}")
     public ResponseEntity<UserDto> readUserById(@PathVariable Long user_id){
-        Optional<User> user = userService.findById(user_id);
-        log.info("read user by id: {}", user_id);
-        if(user.isEmpty()){
-            log.info("user not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UserDto.userNotFound());
-        }
-        return ResponseEntity.ok(UserDto.User2Dto(user.get()));
+        return userService.readById(user_id);
     }
 
     @PutMapping("/{user_id}")

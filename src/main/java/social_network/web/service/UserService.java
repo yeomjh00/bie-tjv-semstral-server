@@ -31,9 +31,32 @@ public class UserService implements CrudService<User, Long> {
         return user;
     }
 
+    public ResponseEntity<UserDto> createUser(UserDto userDto) {
+        User user = User.Dto2User(userDto);
+        if(!CheckValidityAndStatus(user)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.invalidName());
+
+        }
+        if(existsByUsername(user.getUsername())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.duplicatedUserName());
+        }
+        save(user);
+        return ResponseEntity.ok(UserDto.User2Dto(user));
+    }
+
     @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
+    }
+
+    public ResponseEntity<UserDto> readById(Long user_id) {
+        Optional<User> user = findById(user_id);
+        log.info("read user by id: {}", user_id);
+        if(user.isEmpty()){
+            log.info("user not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UserDto.userNotFound());
+        }
+        return ResponseEntity.ok(UserDto.User2Dto(user.get()));
     }
 
     public Optional<User> findByUsername(String username) {
@@ -54,20 +77,19 @@ public class UserService implements CrudService<User, Long> {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public boolean CheckValidityAndDuplicateAndStatus(User user){
+    public boolean CheckValidityAndStatus(User user){
         if (user == null || user.getUsername() == null || user.getRealName() == null || user.getUserStatus() == null){
             log.info("Null User is trying to be created");
             return false;
         }
-        boolean usernameExists = existsByUsername(user.getUsername());
         boolean usernameLengthInvalid = user.getUsername().length() > 255 ||
                 user.getUsername().isEmpty();
         boolean realNameLengthInvalid = user.getRealName().length() > 255 ||
                 user.getRealName().isEmpty();
         boolean userStatusValid = CheckUserStatusValid(user);
-        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}, realNameLengthInvalid: {}, userStatusInvalid: {}",
-                usernameExists, usernameLengthInvalid, realNameLengthInvalid, userStatusValid);
-        return !usernameExists && !usernameLengthInvalid && !realNameLengthInvalid && userStatusValid;
+        log.info("Validity Check: usernameLengthInvalid: {}, realNameLengthInvalid: {}, userStatusInvalid: {}",
+                usernameLengthInvalid, realNameLengthInvalid, userStatusValid);
+        return !usernameLengthInvalid && !realNameLengthInvalid && userStatusValid;
     }
 
     public boolean CheckUserStatusValid(User user){
@@ -76,34 +98,32 @@ public class UserService implements CrudService<User, Long> {
     }
 
     public boolean CheckUsername(String username) {
-        boolean usernameExists = existsByUsername(username);
         boolean usernameLengthInvalid = username.length() > 255 ||
                 username.isEmpty();
-        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}",
-                usernameExists, usernameLengthInvalid);
-        return !usernameExists && !usernameLengthInvalid;
+        return !usernameLengthInvalid;
     }
 
     public ResponseEntity<UserDto> updateUserInfo(Long user_id, UserDto userDto){
         Optional<User> user = findById(user_id);
-        Optional<User> targetUsername = findByUsername(userDto.getUsername());
         if (user.isEmpty()){ // user not found
             log.info("user not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UserDto.userNotFound());
-        } else if(targetUsername.isPresent()
+        }
+        if(! CheckUsername(userDto.getUsername())){
+            log.info("username length is invalid");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.invalidName());
+        }
+        Optional<User> targetUsername = findByUsername(userDto.getUsername());
+        if(targetUsername.isPresent()
                 && !targetUsername.get().getId().equals(user.get().getId())){ // username already exists
             log.info("username already exists");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.duplicatedUserName());
-        } else if(! CheckUsername(userDto.getUsername())){
-            log.info("username length is invalid");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.invalidUserName());
-        } else {
-            log.info("update user: {}", userDto);
-            User u = user.get();
-            u.setInfoFromDto(userDto);
-            save(u);
-            return ResponseEntity.ok(UserDto.User2Dto(u));
         }
+        log.info("update user: {}", userDto);
+        User u = user.get();
+        u.setInfoFromDto(userDto);
+        save(u);
+        return ResponseEntity.ok(UserDto.User2Dto(u));
     }
 
     public HttpStatus deleteUser(Long user_id){
