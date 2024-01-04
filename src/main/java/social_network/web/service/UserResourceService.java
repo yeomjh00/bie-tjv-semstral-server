@@ -26,22 +26,16 @@ public class UserResourceService {
     }
 
     @Transactional
-    public void deleteUserInfoByUserId(Long userId){
+    public void RemoveUserInfoByUserId(Long userId){
         User u = findUserByIdOrThrow(userId);
-        postRepository.deleteByAuthorId(userId);
-        userRepository.deleteById(userId);
-    }
-
-    @Transactional
-    public void updateUserInfoByUserId(Long userId, User user){
-        User u = findUserByIdOrThrow(userId);
-        userRepository.save(user);
-        ArrayList<Post> posts = (ArrayList<Post>) postRepository.findAllByAuthorId(userId);
-        for (Post p : posts){
-            p.setAuthor(user);
-            postRepository.save(p);
-        }
-        return;
+        postRepository.findAll().stream().forEach(
+                post -> {
+                    if (post.getLikes().contains(u)){
+                        post.getLikes().remove(u);
+                        postRepository.save(post);
+                    }
+                }
+        );
     }
 
 
@@ -84,14 +78,5 @@ public class UserResourceService {
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
         return p.getLikes().indexOf(u);
-    }
-
-    public List<Post> findLikedPosts(Long userId){
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()){
-            log.info("user not found");
-            return List.of();
-        }
-        return postRepository.findAll().stream().filter(post -> post.getLikes().contains(user.get())).toList();
     }
 }

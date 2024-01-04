@@ -44,10 +44,6 @@ public class MusicService implements CrudService<Music, Long>{
         return musicRepository.findAllByContainedListId(containedListId);
     }
 
-    public Long countMusicByMusicListId(Long listId) {
-        return musicRepository.countMusicByMusicListId(listId);
-    }
-
     public Music saveFromDto(MusicDto musicDto) {
         var music = Music.Dto2Music(musicDto);
         return musicRepository.save(music);

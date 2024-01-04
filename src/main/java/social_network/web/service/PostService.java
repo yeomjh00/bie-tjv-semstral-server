@@ -1,15 +1,19 @@
 package social_network.web.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import social_network.web.controller.asset.PictureDto;
 import social_network.web.controller.asset.PostDto;
+import social_network.web.domain.Music;
 import social_network.web.domain.Picture;
 import social_network.web.domain.Post;
 import social_network.web.repository.PostRepository;
 import social_network.web.repository.media.PictureRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,39 +37,19 @@ public class PostService implements CrudService<Post, Long> {
         for(Picture photo: post.getPictures()){
             pictureRepository.save(photo);
         }
-        postRepository.save(post);
-        return post;
-    }
-
-    public boolean verifyTitleAndContent(String title, String content){
-        if (title == null || title.isEmpty() || title.length() > 255){
-            return false;
-        } else if (content == null || content.isEmpty()){
-            return false;
-        }
-        return true;
-    }
-
-    public Post verifiedSave(Post post){
         if (post.getContent() == null || post.getContent().isEmpty()){
             throw new IllegalArgumentException("Post content cannot be empty");
         } else if(post.getTitle() == null || post.getTitle().isEmpty() || post.getTitle().length() > 255){
             throw new IllegalArgumentException("Post title cannot be empty and exceed 255 characters");
         }
-        return save(post);
+        postRepository.save(post);
+        return post;
     }
 
-    public Post updatePostFromDto(Long postId, PostDto form) {
-        if (verifyTitleAndContent(form.getTitle(), form.getContent())){
-            var post = findByIdOrThrow(postId);
-            post.setTitle(form.getTitle());
-            post.setContent(form.getContent());
-            updatePhotos(post, form.getPictureDtos());
-            postRepository.save(post);
-            return post;
-        } else {
-            throw new IllegalArgumentException("Post title cannot be empty and exceed 255 characters");
-        }
+    public boolean validateTitleAndContent(String title, String content){
+        if (title == null || title.isEmpty() || title.length() > 255){
+            return false;
+        } else return content != null && !content.isEmpty();
     }
 
     @Override
@@ -84,12 +68,11 @@ public class PostService implements CrudService<Post, Long> {
         return postRepository.findAll();
     }
 
-    public List<Post> findSomeonePosts(Long userId){
-        return findAll().stream().filter(post -> post.getAuthor().getId().equals(userId)).toList();
-    }
-
-    public List<Post> findAllByAuthorId(Long id){
-        return postRepository.findAllByAuthorId(id);
+    public List<PostDto> findAllByAuthorId(Long id){
+        return findAll().stream()
+                .filter(post -> post.getAuthor().getId().equals(id))
+                .map(PostDto::Post2Dto)
+                .toList();
     }
 
     @Override
@@ -98,33 +81,58 @@ public class PostService implements CrudService<Post, Long> {
         return;
     }
 
-    void deleteByAuthorId(Long id){
-        postRepository.deleteByAuthorId(id);
+    public ResponseEntity<PostDto> editPostContentAndTitle(Long id,
+                                                           PostDto form,
+                                                           Music music){
+        Optional<Post> post = postRepository.findById(id);
+        if (post.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(PostDto.postNotFound());
+        } else if(!validateTitleAndContent(form.getTitle(), form.getContent())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PostDto.invalidTitleOrContent());
+        }
+        Post p = post.get();
+
+        List<PictureDto> pictureDtos = Optional.ofNullable(form.getPictureDtos()).orElseGet(Collections::emptyList);
+        List<Picture> pictures = updatePhotos(p, pictureDtos);
+
+        p.setContent(form.getContent());
+        p.setTitle(form.getTitle());
+        p.setSong(music);
+        p.setPictures(pictures);
+
+        postRepository.save(p);
+        return ResponseEntity.ok(PostDto.Post2Dto(p));
     }
 
-    public Post editPostContentAndTitle(Long id, String content, String title) {
-        var post = findByIdOrThrow(id);
-        post.setContent(content);
-        post.setTitle(title);
-        postRepository.updatePostById(post.getId(), post);
-        return post;
+
+    public List<PostDto> findLikedPostsByUserId(Long user_id){
+        return findAll().stream()
+                .filter(post -> post.getLikes().stream().anyMatch(user -> user.getId().equals(user_id)))
+                .map(PostDto::Post2Dto)
+                .toList();
     }
-
-    public List<Post> findMyPostsByUserId(Long id){ return postRepository.findAllByAuthorId(id); }
-
-    public List<Post> findLikedPostsByUserId(Long id){ return postRepository.findLikesByAuthorId(id); }
 
     public void deleteAll() {
         postRepository.deleteAll();
     }
 
-    private void updatePhotos(Post post, List<PictureDto> photos){
+    private List<Picture> updatePhotos(Post post, List<PictureDto> photos){
         for(Picture photo: post.getPictures()){
             pictureRepository.deleteById(photo.getId());
         }
 
-        for(PictureDto photo : photos){
-            pictureRepository.save(Picture.Dto2Picture(photo));
+        List<Picture> picturesToSaved = photos.stream().map(Picture::Dto2Picture).toList();
+
+        for(Picture photo : picturesToSaved){
+            pictureRepository.save(photo);
+        }
+        return picturesToSaved;
+    }
+
+    public void saveAllPicturesFromDto(List<PictureDto> pictureDtos) {
+        List<Picture> photos = pictureDtos.stream().map(Picture::Dto2Picture).toList();
+        for (Picture photo: photos){
+            pictureRepository.save(photo);
         }
     }
 }

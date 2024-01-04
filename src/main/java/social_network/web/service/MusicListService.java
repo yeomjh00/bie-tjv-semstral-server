@@ -74,12 +74,6 @@ public class MusicListService implements CrudService<MusicList, Long>{
         return musicRepository.countMusicByMusicListId(listId);
     }
 
-    public void addSingleMusicInList(MusicList list, Long musicId) {
-        musicRepository.findById(musicId).ifPresent(music -> {
-            list.getTrack().add(music);
-            musicListRepository.save(list);
-        });
-    }
 
     public void addMusicsToList(MusicList list, List<Long> musicIds) {
         musicIds.forEach(musicId -> {
@@ -87,13 +81,6 @@ public class MusicListService implements CrudService<MusicList, Long>{
                 list.getTrack().add(music);
                 musicListRepository.save(list);
             });
-        });
-    }
-
-    public void deleteSingleMusicInList(MusicList list, Long musicId) {
-        musicRepository.findById(musicId).ifPresent(music -> {
-            list.getTrack().remove(music);
-            musicListRepository.save(list);
         });
     }
 
