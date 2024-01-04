@@ -3,6 +3,10 @@ package social_network.web.controller.asset;
 import lombok.*;
 import social_network.web.domain.Post;
 
+import javax.swing.text.html.Option;
+import java.util.List;
+import java.util.Optional;
+
 @NoArgsConstructor @AllArgsConstructor
 @Getter @Setter @Builder
 public class PostDto {
@@ -12,6 +16,8 @@ public class PostDto {
     private String title;
     private String content;
     private Long numberOfLikes;
+    private List<PictureDto> pictureDtos;
+    private MusicDto musicDto;
 
     public PostDto(Post post){
         this.id = post.getId();
@@ -20,15 +26,22 @@ public class PostDto {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.numberOfLikes = (long) post.getLikes().size();
+        this.pictureDtos = post.getPictureDtos();
+        this.musicDto = MusicDto.Music2Dto(post.getSong());
     }
 
     public static PostDto Post2Dto(Post post){
+        List<PictureDto> pictureDtos = Optional.of(post.getPictureDtos())
+                .orElse(List.of());
+
         return PostDto.builder()
                 .id(post.getId())
                 .authorUsername(post.getAuthor().getUsername())
                 .userId(post.getAuthor().getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .pictureDtos(pictureDtos)
+                .musicDto(MusicDto.Music2Dto(post.getSong()))
                 .numberOfLikes((long) post.getLikes().size())
                 .build();
     }
