@@ -10,14 +10,14 @@ import social_network.web.repository.PostRepository;
 import social_network.web.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class UserResourceService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
-    //@TODO: mediaRepository
 
     public UserResourceService(@Autowired UserRepository userRepository,
                                @Autowired PostRepository postRepository){
@@ -30,7 +30,6 @@ public class UserResourceService {
         User u = findUserByIdOrThrow(userId);
         postRepository.deleteByAuthorId(userId);
         userRepository.deleteById(userId);
-        return;
     }
 
     @Transactional
@@ -46,13 +45,13 @@ public class UserResourceService {
     }
 
 
-    public User findUserByIdOrThrow(Long id){
+    private User findUserByIdOrThrow(Long id){
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return u;
     }
 
-    public Post findPostByIdOrThrow(Long id){
+    private Post findPostByIdOrThrow(Long id){
         Post p = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
         return p;
@@ -61,7 +60,9 @@ public class UserResourceService {
     public void likePost(Long userId, Long postId){
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
+        log.info("check if user {} already liked post {}", userId, postId);
         if (doILikePost(userId, postId) == -1){
+            log.info("Can Like");
             p.getLikes().add(u);
             postRepository.save(p);
         }
@@ -71,7 +72,9 @@ public class UserResourceService {
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
         int idx = doILikePost(userId, postId);
+        log.info("check if user {} already liked post {}", userId, postId);
         if (idx != -1) {
+            log.info("Can Unlike");
             p.getLikes().remove(u);
             postRepository.save(p);
         }
@@ -81,5 +84,14 @@ public class UserResourceService {
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
         return p.getLikes().indexOf(u);
+    }
+
+    public List<Post> findLikedPosts(Long userId){
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()){
+            log.info("user not found");
+            return List.of();
+        }
+        return postRepository.findAll().stream().filter(post -> post.getLikes().contains(user.get())).toList();
     }
 }

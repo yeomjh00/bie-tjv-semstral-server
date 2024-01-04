@@ -3,11 +3,12 @@ package social_network.web.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import social_network.web.controller.asset.PostRegisterForm;
+import social_network.web.controller.asset.PictureDto;
+import social_network.web.controller.asset.PostDto;
+import social_network.web.domain.Picture;
 import social_network.web.domain.Post;
-import social_network.web.domain.User;
 import social_network.web.repository.PostRepository;
-import social_network.web.repository.UserRepository;
+import social_network.web.repository.media.PictureRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,15 +19,31 @@ public class PostService implements CrudService<Post, Long> {
 
 
     private final PostRepository postRepository;
+    private final PictureRepository pictureRepository;
 
-    public PostService(@Autowired PostRepository postRepository) {
+    @Autowired
+    public PostService(PostRepository postRepository,
+                       PictureRepository pictureRepository) {
         this.postRepository = postRepository;
+        this.pictureRepository = pictureRepository;
     }
 
     @Override
     public Post save(Post post) {
+        for(Picture photo: post.getPictures()){
+            pictureRepository.save(photo);
+        }
         postRepository.save(post);
         return post;
+    }
+
+    public boolean verifyTitleAndContent(String title, String content){
+        if (title == null || title.isEmpty() || title.length() > 255){
+            return false;
+        } else if (content == null || content.isEmpty()){
+            return false;
+        }
+        return true;
     }
 
     public Post verifiedSave(Post post){
@@ -38,12 +55,17 @@ public class PostService implements CrudService<Post, Long> {
         return save(post);
     }
 
-    public Post updatePostFromDto(PostRegisterForm form) {
-        Post post = Post.builder()
-                .title(form.getTitle())
-                .content(form.getContent())
-                .build();
-        return verifiedSave(post);
+    public Post updatePostFromDto(Long postId, PostDto form) {
+        if (verifyTitleAndContent(form.getTitle(), form.getContent())){
+            var post = findByIdOrThrow(postId);
+            post.setTitle(form.getTitle());
+            post.setContent(form.getContent());
+            updatePhotos(post, form.getPictureDtos());
+            postRepository.save(post);
+            return post;
+        } else {
+            throw new IllegalArgumentException("Post title cannot be empty and exceed 255 characters");
+        }
     }
 
     @Override
@@ -60,6 +82,10 @@ public class PostService implements CrudService<Post, Long> {
     @Override
     public List<Post> findAll() {
         return postRepository.findAll();
+    }
+
+    public List<Post> findSomeonePosts(Long userId){
+        return findAll().stream().filter(post -> post.getAuthor().getId().equals(userId)).toList();
     }
 
     public List<Post> findAllByAuthorId(Long id){
@@ -88,4 +114,17 @@ public class PostService implements CrudService<Post, Long> {
 
     public List<Post> findLikedPostsByUserId(Long id){ return postRepository.findLikesByAuthorId(id); }
 
+    public void deleteAll() {
+        postRepository.deleteAll();
+    }
+
+    private void updatePhotos(Post post, List<PictureDto> photos){
+        for(Picture photo: post.getPictures()){
+            pictureRepository.deleteById(photo.getId());
+        }
+
+        for(PictureDto photo : photos){
+            pictureRepository.save(Picture.Dto2Picture(photo));
+        }
+    }
 }

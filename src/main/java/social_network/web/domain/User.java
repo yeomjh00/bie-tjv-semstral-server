@@ -2,10 +2,8 @@ package social_network.web.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.mapping.Set;
-import social_network.web.controller.asset.UserRegisterForm;
+import social_network.web.controller.asset.UserDto;
 
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -24,13 +22,13 @@ public class User {
     private String realName;
     private String userStatus;
     private String introduction;
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Post> myPosts;
 
     @ManyToMany(mappedBy = "likes")
     private List<Post> likedPosts;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
     private List<MusicList> myMusicLists;
 
     public void setUserStatusTrial(){
@@ -46,5 +44,24 @@ public class User {
                 && this.realName.equals(user.getRealName())
                 && this.userStatus.equals(user.getUserStatus())
                 && this.introduction.equals(user.getIntroduction());
+    }
+
+    public static User Dto2User(UserDto userDto){
+        String userStatus = "membership".equals(userDto.getUserStatus()) ? "membership" : "trial";
+        return User.builder()
+                .id(userDto.getId())
+                .username(userDto.getUsername())
+                .realName(userDto.getRealName())
+                .userStatus(userStatus)
+                .introduction(userDto.getIntroduction())
+                .build();
+    }
+
+    public void setInfoFromDto(UserDto userDto){
+        String userStatus = userDto.getUserStatus().equals("membership") ? "membership" : "trial";
+        this.username = userDto.getUsername();
+        this.realName = userDto.getRealName();
+        this.userStatus = userStatus;
+        this.introduction = userDto.getIntroduction();
     }
 }

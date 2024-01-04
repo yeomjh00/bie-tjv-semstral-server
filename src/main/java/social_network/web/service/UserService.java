@@ -1,19 +1,10 @@
 package social_network.web.service;
 
-import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.AssertionFailure;
-import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpServerErrorException;
-import social_network.web.controller.asset.UserRegisterForm;
-import social_network.web.domain.Post;
 import social_network.web.domain.User;
-import social_network.web.repository.PostRepository;
-import social_network.web.repository.UserJpaRepository;
 import social_network.web.repository.UserRepository;
 
 import java.util.List;
@@ -31,23 +22,9 @@ public class UserService implements CrudService<User, Long> {
 
     @Override
     public User save(User user) {
-        duplicateAndNullCheck(user);
-        userStatusValidCheck(user);
+        log.info("save user with username: {}, realName: {}, userStatus: {}, introduction: {}",
+                user.getUsername(), user.getRealName(), user.getUserStatus(), user.getIntroduction());
         userRepository.save(user);
-        return user;
-    }
-
-    public User saveFromDto(UserRegisterForm userRegisterForm){
-        var user = new User();
-        user.setUsername(userRegisterForm.getUsername());
-        user.setRealName(userRegisterForm.getRealName());
-        user.setIntroduction(userRegisterForm.getIntroduction());
-        user.setUserStatus(userRegisterForm.getUserStatus());
-        return save(user);
-    }
-
-    //@NotImplemented
-    public User updateUserIfIdMatched(User user){
         return user;
     }
 
@@ -56,10 +33,12 @@ public class UserService implements CrudService<User, Long> {
         return userRepository.findById(id);
     }
 
-    public User findByIdOrThrow(Long id){
-        User u = findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return u;
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public Optional<User> findByRealName(String realName) {
+        return userRepository.findByRealName(realName);
     }
 
     @Override
@@ -70,59 +49,39 @@ public class UserService implements CrudService<User, Long> {
     @Override
     public void deleteById(Long id) { userRepository.deleteById(id); }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
 
-    public Optional<User> findByRealName(String realName) {
-        return userRepository.findByRealName(realName);
-    }
 
     public boolean existsByUsername(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public void duplicateAndNullCheck(User user){
-        if (user == null){
-            throw new NullPointerException("User is null");
-        }
-        else if (existsByUsername(user.getUsername())){
-            log.error("Username already exists" + user.getUsername());
-            log.error("repository result: ");
-            log.error(userRepository.findByUsername(user.getUsername()).get().getUsername());
-            throw new IllegalArgumentException("Username already exists");
-        }
-        else if (user.getUsername().length() > 255 ||
-                user.getUsername().isEmpty()){
-            throw new IllegalArgumentException("Username must be less than 255 characters and not empty");
-        }
-        else if (user.getRealName().length() > 255 ||
-                user.getRealName().isEmpty()){
-            throw new IllegalArgumentException("Real name must be less than 255 characters and not empty");
-        }
-    }
-
-    public boolean CheckValidityAndDuplicate(User user){
-        if (user == null){
-            throw new NullPointerException("User is null");
+    public boolean CheckValidityAndDuplicateAndStatus(User user){
+        if (user == null || user.getUsername() == null || user.getRealName() == null || user.getUserStatus() == null){
+            log.info("Null User is trying to be created");
+            return false;
         }
         boolean usernameExists = existsByUsername(user.getUsername());
         boolean usernameLengthInvalid = user.getUsername().length() > 255 ||
                 user.getUsername().isEmpty();
         boolean realNameLengthInvalid = user.getRealName().length() > 255 ||
                 user.getRealName().isEmpty();
-        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}, realNameLengthInvalid: {}",
-                usernameExists, usernameLengthInvalid, realNameLengthInvalid);
-        return !usernameExists && !usernameLengthInvalid && !realNameLengthInvalid;
+        boolean userStatusValid = CheckUserStatusValid(user);
+        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}, realNameLengthInvalid: {}, userStatusInvalid: {}",
+                usernameExists, usernameLengthInvalid, realNameLengthInvalid, userStatusValid);
+        return !usernameExists && !usernameLengthInvalid && !realNameLengthInvalid && userStatusValid;
     }
 
-    public void userStatusValidCheck(User user){
-        if (user.getUserStatus().equals("trial") ||
-                user.getUserStatus().equals("membership")){
-            return;
-        }
-        else{
-            throw new IllegalArgumentException("User status must be trial or membership");
-        }
+    public boolean CheckUserStatusValid(User user){
+        return user.getUserStatus().equals("trial") ||
+                user.getUserStatus().equals("membership");
+    }
+
+    public boolean CheckUsername(String username) {
+        boolean usernameExists = existsByUsername(username);
+        boolean usernameLengthInvalid = username.length() > 255 ||
+                username.isEmpty();
+        log.info("Validity Check: usernameExists: {}, usernameLengthInvalid: {}",
+                usernameExists, usernameLengthInvalid);
+        return !usernameExists && !usernameLengthInvalid;
     }
 }

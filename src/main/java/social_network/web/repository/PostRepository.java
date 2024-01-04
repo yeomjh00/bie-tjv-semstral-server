@@ -23,4 +23,6 @@ public interface PostRepository extends CrudRepository<Post, Long>{
     public List<Post> findAllByAuthorUsername(String username);
 
     void deleteByAuthorId(Long id);
+
+    void deleteAll();
 }
