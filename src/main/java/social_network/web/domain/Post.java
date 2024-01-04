@@ -29,8 +29,12 @@ public class Post {
     private User author;
     private String title;
     private String content;
-    @ManyToMany
-    private List<User> likes;
+    @ManyToMany(cascade = CascadeType.MERGE)
+    @JoinTable(name = "posts_likes",
+            joinColumns = @JoinColumn(name = "liked_posts_post_id"),
+            inverseJoinColumns = @JoinColumn(name = "likes_userid")
+    )
+    List<User> likes;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Picture> pictures;
