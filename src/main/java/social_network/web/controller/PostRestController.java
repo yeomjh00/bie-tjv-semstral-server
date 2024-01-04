@@ -6,14 +6,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import social_network.web.controller.asset.PostDto;
+import social_network.web.domain.Music;
+import social_network.web.domain.Picture;
 import social_network.web.domain.Post;
 import social_network.web.domain.User;
+import social_network.web.service.PictureService;
 import social_network.web.service.PostService;
 import social_network.web.service.UserResourceService;
 import social_network.web.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -23,13 +27,18 @@ public class PostRestController {
     private final PostService postService;
     private final UserResourceService userResourceService;
 
+    private final PictureService pictureService;
+
+
     @Autowired
     public PostRestController(UserService userService,
                               PostService postService,
-                              UserResourceService userResourceService){
+                              UserResourceService userResourceService,
+                              PictureService pictureService){
         this.userService = userService;
         this.postService = postService;
         this.userResourceService = userResourceService;
+        this.pictureService = pictureService;
     }
 
     @GetMapping("/posts")
@@ -42,14 +51,24 @@ public class PostRestController {
 
     @PostMapping("/posts")
     public HttpStatus createPost(@RequestBody PostDto postDto){
-        log.info("create post: {}", postDto);
+        log.info("create post with: {}, {}, {}", postDto.getUserId(), postDto.getPictureDtos(), postDto.getMusicDto());
+
         Optional<User> user = userService.findById(postDto.getUserId());
         if (user.isEmpty()){
             log.info("user not found");
             return HttpStatus.NOT_FOUND;
         }
+        if(!postDto.getPictureDtos().isEmpty() && postDto.getMusicDto() != null){
+            pictureService.saveAllFromDto(postDto.getPictureDtos());
+        }
         postService.save(Post.Dto2Post(postDto, user.get()));
         return HttpStatus.CREATED;
+    }
+
+    @DeleteMapping("/posts")
+    public void deleteAllPosts(){
+        log.info("delete all posts");
+        postService.deleteAll();
     }
 
     @GetMapping("/posts/{post_id}")
@@ -72,7 +91,10 @@ public class PostRestController {
         Post p = post.get();
         p.setContent(postDto.getContent());
         p.setTitle(postDto.getTitle());
-        // TODO: add media
+        p.setSong(postDto.getMusicDto() == null ? null : Music.Dto2Music(postDto.getMusicDto()));
+        pictureService.deletePictures(p.getPictures());
+        p.setPictures(postDto.getPictureDtos().stream().map(Picture::Dto2Picture).collect(Collectors.toList()));
+
         postService.save(p);
         return ResponseEntity.status(HttpStatus.OK).body(PostDto.Post2Dto(p));
     }
@@ -105,11 +127,9 @@ public class PostRestController {
                 .toList();
     }
 
-
-    // TODO
     @PostMapping("/posts/{post_id}/like")
     public void likePost(@RequestParam Long user_id, @PathVariable Long post_id){
-        log.info("try: like post");
+        log.info("try: like post {} by user {}", post_id, user_id);
         Optional<User> user = userService.findById(user_id);
         if (user.isEmpty()){
             log.info("user not found");
@@ -118,10 +138,9 @@ public class PostRestController {
         userResourceService.likePost(user_id, post_id);
     }
 
-    //TODO
     @DeleteMapping("/posts/{post_id}/like")
     public void unlikePost(@RequestParam Long user_id, @PathVariable Long post_id){
-        log.info("try: unlike post");
+        log.info("try: unlike post {} by user {}", post_id, user_id);
         Optional<User> user = userService.findById(user_id);
         if (user.isEmpty()){
             log.info("user not found");
