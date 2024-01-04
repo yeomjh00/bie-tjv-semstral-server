@@ -19,8 +19,6 @@ public class UserResourceService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    //@TODO: mediaRepository
-
     public UserResourceService(@Autowired UserRepository userRepository,
                                @Autowired PostRepository postRepository){
         this.userRepository = userRepository;
@@ -62,7 +60,9 @@ public class UserResourceService {
     public void likePost(Long userId, Long postId){
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
+        log.info("check if user {} already liked post {}", userId, postId);
         if (doILikePost(userId, postId) == -1){
+            log.info("Can Like");
             p.getLikes().add(u);
             postRepository.save(p);
         }
@@ -72,7 +72,9 @@ public class UserResourceService {
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
         int idx = doILikePost(userId, postId);
+        log.info("check if user {} already liked post {}", userId, postId);
         if (idx != -1) {
+            log.info("Can Unlike");
             p.getLikes().remove(u);
             postRepository.save(p);
         }
