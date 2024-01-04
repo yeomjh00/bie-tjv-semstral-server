@@ -22,13 +22,13 @@ public class User {
     private String realName;
     private String userStatus;
     private String introduction;
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Post> myPosts;
 
     @ManyToMany(mappedBy = "likes")
     private List<Post> likedPosts;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
     private List<MusicList> myMusicLists;
 
     public void setUserStatusTrial(){
