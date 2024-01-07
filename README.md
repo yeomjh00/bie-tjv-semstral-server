@@ -1,10 +1,13 @@
 # BIE-TJV-Semester-Project \<Social Network System with Media\>
-# Tools
+# Server
+## Dependency
 - JDK 17
-- Spring Boot 3.2.0
-- H2 DB 2.2.224 → Will be replaced by MySQL
-- Spring Data JPA 2.6.0
+- Spring Boot 3.2.0 (org.springframework.boot:spring-boot-starter-web)
+- MySQL (mysql:mysql-connector-java:8.0.26)
+- Spring Data JPA 2.6.0 (org.springframework.boot:spring-boot-starter-data-jpa)
 - Gradle 8.5
+- org.projectlombok:lombok
+- org.springframework.boot:spring-boot-starter-test
 
 # Data
 ![DataConceptualRelation](./images/data_conceptual_relation_new.png)
@@ -13,6 +16,7 @@
  - UserId: Identifier for user / Long / Not Null
  - RealName: Real name of user / String / Null
  - String status: status of user / String / Not Null
+ - String Introduction: Introduction of user / String / Null
  - PostLikedByMe: Post I liked / Collection\<Post> / Null
  - MyPosts: Post I uploaded / Collection\<Post> / Null
  - MyMusicList: Music list I made by adding from Music Database / Collection\<Post> / Null
@@ -29,7 +33,7 @@ with `MusicList`:
 ### Field (Name: Description / Data Type / Nullable)
 - PostId: Identifier for Post / Long / Not Null
 - Title: title of the post / String / Not Null
-- TextContents: Text Contents / String / Not Null
+- Contents: Text Contents / String / Not Null
 - Author: Author of the post / User / Not Null
 - Likes: user who like this post / Collection\<User> / Null
 - Optional Field (Post may contain some of these fields)
@@ -39,18 +43,24 @@ with `MusicList`:
 ### Relation
 with `User`: see User Section
 
-with `Picture`, `Music`:
- - One-to-Many Relation: Single media file can be indicated by multiple Posts
+with `Picture`:
+ - One-to-Many Relation: Single post can contain multiple pictures
+
+with `Music`:
+ - Many-to-One Relation: Single media file can be indicated by multiple Posts
 
 ## Media
 ### Field (Name: Description / Data Type / Nullable)
 1. Picture
+- id: identifier of picture / Long / Not Null
+- uri: uri of picture / String / Not Null
 - width: - / Long / Not Null
 - height: - / Long / Not Null
 2. Music
-- MusicId: identifier of music / Long / Not Null
-- PlayTime: playtime of each music / Long / Not Null
-- PostedTimes: how many posted / Long / Not Null (Default: 0)
+- id: identifier of music / Long / Not Null
+- uri: uri of music(YouTube) / String / Not Null
+- title: title of music / String / Not Null
+- artist: artist of music / String / Not Null
 
 ### Relation
 with `Post`: see Post Section
@@ -62,32 +72,34 @@ with `MusicList`:
 ### Field (Name: Description / Data Type / Nullable)
  - ListId: identifier of the lists / Long / Not Null
  - Owner: owner of this list / User / Not Null
- - Musics: Musics contained by this list / Collection\<PlayableMedia> / Null
+ - listName: name of the list / String / Not Null
+ - description: description of the list / String / Null
 
 ### Relation
 
 with `User`: See User Section
 
-with `Media`: See Media Section
+with `Music`: See Media Section
 
 ---
 
 # Query
 - Basic CRUD queries for each entity
+- Some Select queries with foreign key (e.g. select all posts with username)
 - Return number of music list owned by specific user. (For restriction) 
 
 # Complex Business Operation Logic
 Assumption: Behavior of Presentation Layer(user) is omitted. (Since I assumed all behaviors in this layer are just pressing the button as an action, update the window as a respondance)
-![WorkFlow](./images/Entire_Work_Flow.png)
-
-## User Status Degradation
-When user's membership is expired(or, decide to degrade him/her status), after he/she push the button,
-
-1. user client get some information about music lists
-2. If it violates the restriction, it will be rejected.
-3. If not, user client send request to server
-
-**Trial member can have 5 music lists, and 30 musics in each list at a time.**
 
 ## Creating Music List, Adding Music to list.
-Similarly, based on the restriction described above, user client get some information about music lists, and send request to server.
+1. Create Music List (Up to 3 lists for trial members)
+   1. Check Available Music List Count
+   2. If it is available, create music list
+   3. If not, reject the request
+2. Add Music to List (Up to 30 musics for trial members)
+   1. Check Available Music Count
+   2. If it is available, add music to list
+   3. If not, reject the request
+
+![WorkFlow](./images/Entire_Work_Flow.png)
+
