@@ -78,4 +78,16 @@ public class PostDto {
                 .numberOfLikes(-1L)
                 .build();
     }
+
+    public boolean equals(PostDto post){
+        return this.id.equals(post.getId())
+                && this.authorUsername.equals(post.getAuthorUsername())
+                && this.userId.equals(post.getUserId())
+                && this.title.equals(post.getTitle())
+                && this.content.equals(post.getContent())
+                && this.numberOfLikes.equals(post.getNumberOfLikes())
+                && this.pictureDtos.equals(post.getPictureDtos())
+                && this.musicDto.equals(post.getMusicDto());
+
+    }
 }
