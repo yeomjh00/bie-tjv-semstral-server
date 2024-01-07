@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import social_network.web.controller.asset.PostDto;
 import social_network.web.domain.Music;
-import social_network.web.domain.Picture;
 import social_network.web.domain.Post;
 import social_network.web.domain.User;
 import social_network.web.service.PictureService;
@@ -17,7 +16,6 @@ import social_network.web.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -50,7 +48,7 @@ public class PostRestController {
         return ResponseEntity.ok(posts);
     }
 
-    @PostMapping("/posts")
+    @PostMapping("/posts") //TODO
     public HttpStatus createPost(@RequestBody PostDto postDto){
         log.info("create post with: {}, {}, {}", postDto.getUserId(), postDto.getPictureDtos(), postDto.getMusicDto());
 
@@ -60,7 +58,7 @@ public class PostRestController {
             return HttpStatus.NOT_FOUND;
         }
         if(!postDto.getPictureDtos().isEmpty() && postDto.getMusicDto() != null){
-            pictureService.saveAllFromDto(postDto.getPictureDtos());
+            postService.saveAllPicturesFromDto(postDto.getPictureDtos());
         }
         postService.save(Post.Dto2Post(postDto, user.get()));
         return HttpStatus.CREATED;
@@ -90,14 +88,8 @@ public class PostRestController {
         }
 
         Post p = post.get();
-        p.setContent(postDto.getContent());
-        p.setTitle(postDto.getTitle());
-        p.setSong(postDto.getMusicDto() == null ? null : Music.Dto2Music(postDto.getMusicDto()));
-        pictureService.deletePictures(p.getPictures());
-        p.setPictures(postDto.getPictureDtos().stream().map(Picture::Dto2Picture).collect(Collectors.toList()));
-
-        postService.save(p);
-        return ResponseEntity.status(HttpStatus.OK).body(PostDto.Post2Dto(p));
+        Music music = postDto.getMusicDto() == null ? null : Music.Dto2Music(postDto.getMusicDto());
+        return postService.editPostContentAndTitle(post_id, postDto, music);
     }
 
     @DeleteMapping("/posts/{post_id}")
@@ -114,19 +106,14 @@ public class PostRestController {
     @GetMapping("/posts/owned")
     public ResponseEntity<List<PostDto>> readSomeonePosts(@RequestParam Long user_id){
         log.info("read all posts");
-        List<PostDto> posts = postService.findSomeonePosts(user_id).stream()
-                .map(PostDto::Post2Dto)
-                .toList();
+        List<PostDto> posts = postService.findAllByAuthorId(user_id);
         return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/posts/liked")
     public ResponseEntity<List<PostDto>> readLikedPostsByUserId(@RequestParam Long user_id){
         log.info("read all posts");
-        List<PostDto> posts = postService.findAll().stream()
-                .filter(post -> post.getLikes().stream().anyMatch(user -> user.getId().equals(user_id)))
-                .map(PostDto::Post2Dto)
-                .toList();
+        List<PostDto> posts = postService.findLikedPostsByUserId(user_id);
         return ResponseEntity.ok(posts);
     }
 

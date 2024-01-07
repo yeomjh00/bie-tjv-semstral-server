@@ -67,4 +67,15 @@ public class PostDto {
                 .numberOfLikes(-1L)
                 .build();
     }
+
+    public static PostDto invalidTitleOrContent() {
+        return PostDto.builder()
+                .id(-1L)
+                .authorUsername("Invalid Title or Content")
+                .userId(-1L)
+                .title("Invalid Title or Content")
+                .content("Invalid Title or Content")
+                .numberOfLikes(-1L)
+                .build();
+    }
 }

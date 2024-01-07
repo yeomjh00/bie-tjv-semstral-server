@@ -83,10 +83,6 @@ public class MusicListRestController {
     public ResponseEntity<List<MusicListDto>> readAllMusicListsByOwnerId(@RequestParam Long user_id){
         log.info("read all music lists by owner id: {}", user_id);
         List<MusicList> lists = musicListService.findAllByOwnerId(user_id);
-        if (lists.isEmpty()){
-            log.info("music lists not found");
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(lists.stream().map(MusicListDto::MusicList2Dto).toList());
     }
 

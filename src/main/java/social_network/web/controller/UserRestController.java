@@ -46,7 +46,7 @@ public class UserRestController {
             userService.save(user);
             return ResponseEntity.ok(UserDto.User2Dto(user));
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.userNotFound());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UserDto.duplicatedUserName());
     }
 
     @GetMapping("/{user_id}")
@@ -55,39 +55,19 @@ public class UserRestController {
         log.info("read user by id: {}", user_id);
         if(user.isEmpty()){
             log.info("user not found");
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(UserDto.userNotFound());
         }
         return ResponseEntity.ok(UserDto.User2Dto(user.get()));
     }
 
     @PutMapping("/{user_id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long user_id, @RequestBody UserDto userDto){
-        Optional<User> user = userService.findById(user_id);
-        Optional<User> targetUsername = userService.findByUsername(userDto.getUsername());
-        if (user.isEmpty()){ // user not found
-            log.info("user not found");
-            return ResponseEntity.notFound().build();
-        } else if(targetUsername.isPresent()
-                && !targetUsername.get().getId().equals(user.get().getId())){ // username already exists
-            log.info("username already exists");
-            return ResponseEntity.badRequest().build();
-        } else {
-            log.info("update user: {}", userDto);
-            User u = user.get();
-            u.setInfoFromDto(userDto);
-            userService.save(u);
-            return ResponseEntity.ok(UserDto.User2Dto(u));
-        }
+        return userService.updateUserInfo(user_id, userDto);
     }
 
     @DeleteMapping("/{user_id}")
-    public void deleteUser(@PathVariable Long user_id){
-        Optional<User> user = userService.findById(user_id);
-        if (user.isEmpty()){
-            log.info("user not found");
-            return;
-        }
-        log.info("delete user by id: {}", user_id);
-        userResourceService.deleteUserInfoByUserId(user_id);
+    public HttpStatus deleteUser(@PathVariable Long user_id){
+        userResourceService.RemoveUserInfoByUserId(user_id);
+        return userService.deleteUser(user_id);
     }
 }
