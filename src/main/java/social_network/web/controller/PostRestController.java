@@ -48,7 +48,7 @@ public class PostRestController {
         return ResponseEntity.ok(posts);
     }
 
-    @PostMapping("/posts") //TODO
+    @PostMapping("/posts")
     public HttpStatus createPost(@RequestBody PostDto postDto){
         log.info("create post with: {}, {}, {}", postDto.getUserId(), postDto.getPictureDtos(), postDto.getMusicDto());
 
@@ -60,8 +60,8 @@ public class PostRestController {
         if(!postDto.getPictureDtos().isEmpty() && postDto.getMusicDto() != null){
             postService.saveAllPicturesFromDto(postDto.getPictureDtos());
         }
-        postService.save(Post.Dto2Post(postDto, user.get()));
-        return HttpStatus.CREATED;
+        Post response = postService.save(Post.Dto2Post(postDto, user.get()));
+        return response.getId() == -1 ? HttpStatus.BAD_REQUEST : HttpStatus.CREATED;
     }
 
     @DeleteMapping("/posts")

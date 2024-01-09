@@ -37,10 +37,12 @@ public class PostService implements CrudService<Post, Long> {
         for(Picture photo: post.getPictures()){
             pictureRepository.save(photo);
         }
-        if (post.getContent() == null || post.getContent().isEmpty()){
-            throw new IllegalArgumentException("Post content cannot be empty");
-        } else if(post.getTitle() == null || post.getTitle().isEmpty() || post.getTitle().length() > 255){
-            throw new IllegalArgumentException("Post title cannot be empty and exceed 255 characters");
+        if (post.getContent() == null
+                || post.getTitle() == null
+                || post.getContent().isEmpty()
+                || post.getTitle().isEmpty()
+                || post.getTitle().length() > 255){
+            return Post.Dto2Post(PostDto.invalidTitleOrContent(), post.getAuthor());
         }
         postRepository.save(post);
         return post;

@@ -17,6 +17,7 @@ public class Music{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "musicId")
     private Long id;
+    @Column(length=1024)
     private String uri;
     private String title;
     private String artist;

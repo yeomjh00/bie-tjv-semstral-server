@@ -42,6 +42,16 @@ public class MusicListService implements CrudService<MusicList, Long>{
         if (user.isEmpty()){
             log.info("user not found");
             return null;
+        } else if (musicListDto.getListName() == null
+                || musicListDto.getListName().isEmpty()
+                || musicListDto.getListName().length() > 255){
+            log.info("list name is empty");
+            return null;
+        } else if(musicListDto.getDescription() == null
+                || musicListDto.getDescription().isEmpty()
+                || musicListDto.getDescription().length() > 255){
+            log.info("description is empty");
+            return null;
         }
         User owner = user.get();
         return musicListRepository.save(MusicList.Dto2MusicList(musicListDto, owner));

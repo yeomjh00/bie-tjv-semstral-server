@@ -4,6 +4,7 @@ import lombok.*;
 import social_network.web.domain.Post;
 
 import javax.swing.text.html.Option;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +77,8 @@ public class PostDto {
                 .title("Invalid Title or Content")
                 .content("Invalid Title or Content")
                 .numberOfLikes(-1L)
+                .musicDto(null)
+                .pictureDtos(Collections.emptyList())
                 .build();
     }
 
