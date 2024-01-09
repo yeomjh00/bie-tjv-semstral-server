@@ -2,6 +2,7 @@ package social_network.web.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import social_network.web.controller.asset.MusicDto;
 import social_network.web.domain.Music;
@@ -44,8 +45,14 @@ public class MusicService implements CrudService<Music, Long>{
         return musicRepository.findAllByContainedListId(containedListId);
     }
 
-    public Music saveFromDto(MusicDto musicDto) {
-        var music = Music.Dto2Music(musicDto);
-        return musicRepository.save(music);
+    public HttpStatus saveFromDto(MusicDto musicDto) {
+        if (musicDto == null){
+            return HttpStatus.BAD_REQUEST;
+        } else if(musicDto.getUri().length() > 1023 || musicDto.getUri().isEmpty()){
+            return HttpStatus.BAD_REQUEST;
+        } else{
+            var music = musicRepository.save(Music.Dto2Music(musicDto));
+            return music == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CREATED;
+        }
     }
 }

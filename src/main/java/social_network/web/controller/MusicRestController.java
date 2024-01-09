@@ -36,12 +36,7 @@ public class MusicRestController {
     @PostMapping
     public HttpStatus createMusic(@RequestBody MusicDto musicDto){
         log.info("create music: {}", musicDto);
-        Music music = musicService.saveFromDto(musicDto);
-        if (music == null){
-            log.info("music not created");
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return HttpStatus.CREATED;
+        return musicService.saveFromDto(musicDto);
     }
 
     @GetMapping("/{id}")
@@ -59,7 +54,9 @@ public class MusicRestController {
     public ResponseEntity<List<MusicDto>> readAllMusicsByContainedListId(@RequestParam Long listId){
         log.info("read all musics by contained list id: {}", listId);
         List<Music> musics = musicService.findAllByContainedListId(listId);
-        if (musics.isEmpty()){
+        if (musics == null){
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } else if (musics.isEmpty()){
             log.info("musics not found");
             return ResponseEntity.notFound().build();
         }

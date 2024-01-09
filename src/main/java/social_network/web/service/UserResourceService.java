@@ -28,7 +28,7 @@ public class UserResourceService {
     @Transactional
     public void RemoveUserInfoByUserId(Long userId){
         User u = findUserByIdOrThrow(userId);
-        postRepository.findAll().stream().forEach(
+        postRepository.findAll().forEach(
                 post -> {
                     if (post.getLikes().contains(u)){
                         post.getLikes().remove(u);
@@ -55,7 +55,7 @@ public class UserResourceService {
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
         log.info("check if user {} already liked post {}", userId, postId);
-        if (doILikePost(userId, postId) == -1){
+        if (doILikePost(u, p) == -1){
             log.info("Can Like");
             p.getLikes().add(u);
             postRepository.save(p);
@@ -65,7 +65,7 @@ public class UserResourceService {
     public void unlikePost(Long userId, Long postId){
         User u = findUserByIdOrThrow(userId);
         Post p = findPostByIdOrThrow(postId);
-        int idx = doILikePost(userId, postId);
+        int idx = doILikePost(u, p);
         log.info("check if user {} already liked post {}", userId, postId);
         if (idx != -1) {
             log.info("Can Unlike");
@@ -74,9 +74,7 @@ public class UserResourceService {
         }
     }
 
-    public int doILikePost(Long userId, Long postId){
-        User u = findUserByIdOrThrow(userId);
-        Post p = findPostByIdOrThrow(postId);
+    public int doILikePost(User u, Post p){
         return p.getLikes().indexOf(u);
     }
 }

@@ -20,4 +20,11 @@ public class PictureDto {
                 .width(picture.getWidth())
                 .build();
     }
+
+    public boolean equals(PictureDto picture){
+        return this.id.equals(picture.getId())
+                && this.uri.equals(picture.getUri())
+                && this.height.equals(picture.getHeight())
+                && this.width.equals(picture.getWidth());
+    }
 }

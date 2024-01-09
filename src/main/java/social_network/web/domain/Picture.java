@@ -13,6 +13,7 @@ public class Picture{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pictureId")
     private Long id;
+    @Column(length=512)
     private String uri;
     private Integer height;
     private Integer width;
